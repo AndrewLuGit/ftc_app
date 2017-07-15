@@ -25,6 +25,11 @@ public class Test extends OpMode{
     public static final double clawspeed = 0.1;
     @Override
     public void init() {
+        driveLeft = hardwareMap.dcMotor.get("driveLeft");
+        driveRight = hardwareMap.dcMotor.get("driveRight");
+        armMotor = hardwareMap.dcMotor.get("armMotor");
+        clawLeft = hardwareMap.servo.get("clawLeft");
+        clawRight = hardwareMap.servo.get("clawRight");
         driveLeft.setDirection(DcMotor.Direction.REVERSE);
         clawLeft.setPosition(clawinit);
         clawRight.setPosition(clawinit);
