@@ -20,6 +20,8 @@ public class wc extends OpMode {
         driveLeft = hardwareMap.dcMotor.get("driveLeft");
         driveRight = hardwareMap.dcMotor.get("driveRight");
         driveLeft.setDirection(DcMotor.Direction.REVERSE);
+        driveLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        driveRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     @Override
