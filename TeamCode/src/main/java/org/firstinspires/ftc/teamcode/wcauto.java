@@ -1,5 +1,4 @@
 package org.firstinspires.ftc.teamcode;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -28,7 +27,7 @@ public class wcauto extends LinearOpMode {
         System.out.println("====Andrew driveLeft ====");
         driveRight = hardwareMap.dcMotor.get("driveRight");
         System.out.println("====Andrew driveRight ====");
-        driveLeft.setDirection(DcMotor.Direction.REVERSE);
+        driveRight.setDirection(DcMotor.Direction.REVERSE);
         System.out.println("====Andrew REVERSE ====");
         telemetry.addData("Status","Resetting Encoders");
         telemetry.update();
