@@ -40,6 +40,15 @@ public class mech_teleop extends OpMode {
         }else if(gamepad1.left_stick_x>=0.5&&Math.abs(gamepad1.left_stick_y)>=0.5){
             drivelf.setPower(Math.sqrt(Math.pow(gamepad1.left_stick_x,2)+Math.pow(gamepad1.left_stick_y,2))/Math.sqrt(2));
             driverb.setPower(Math.sqrt(Math.pow(gamepad1.left_stick_x,2)+Math.pow(gamepad1.left_stick_y,2))/Math.sqrt(2));
+        }else if(gamepad1.left_stick_x<=-0.5&&Math.abs(gamepad1.left_stick_y)>=0.5){
+            driverf.setPower(Math.sqrt(Math.pow(gamepad1.left_stick_x,2)+Math.pow(gamepad1.left_stick_y,2))/Math.sqrt(2));
+            drivelb.setPower(Math.sqrt(Math.pow(gamepad1.left_stick_x,2)+Math.pow(gamepad1.left_stick_y,2))/Math.sqrt(2));
+        }else if(gamepad1.left_stick_x>=0.5&&Math.abs(gamepad1.left_stick_y)<=-0.5){
+            driverf.setPower(-Math.sqrt(Math.pow(gamepad1.left_stick_x,2)+Math.pow(gamepad1.left_stick_y,2))/Math.sqrt(2));
+            drivelb.setPower(-Math.sqrt(Math.pow(gamepad1.left_stick_x,2)+Math.pow(gamepad1.left_stick_y,2))/Math.sqrt(2));
+        }else if(gamepad1.left_stick_x<=-0.5&&Math.abs(gamepad1.left_stick_y)<=-0.5){
+            drivelf.setPower(-Math.sqrt(Math.pow(gamepad1.left_stick_x,2)+Math.pow(gamepad1.left_stick_y,2))/Math.sqrt(2));
+            driverb.setPower(-Math.sqrt(Math.pow(gamepad1.left_stick_x,2)+Math.pow(gamepad1.left_stick_y,2))/Math.sqrt(2));
         }
     }
 }
