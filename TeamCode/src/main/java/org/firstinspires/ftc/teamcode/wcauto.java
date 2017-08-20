@@ -6,10 +6,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
- * Autonomous for wc drive.
+ * Autonomous for def2 drive.
  * Currently used to draw a square
  */
-@Autonomous(name="square",group="wc")
+@Autonomous(name="square",group="def2")
 public class wcauto extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor driveLeft;

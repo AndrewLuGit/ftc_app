@@ -5,10 +5,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 /**
- * Teleop program for West Coast Drive
+ * Default teleop for 2wd
  */
-@TeleOp(name="Teleop",group="wc")
-public class wc extends OpMode {
+@TeleOp(name="Teleop",group="def2")
+public class def2 extends OpMode {
     private DcMotor driveLeft;
     private DcMotor driveRight;
     public static final double fullSpeed = 1.0;
