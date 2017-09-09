@@ -1,32 +1,49 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.OrientationSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 /**
  * Autonomous for def2 drive.
- * Currently used to draw a square
+ * Currently used to stop on line
  */
 @Autonomous(name="square",group="def2")
 public class wcauto extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor driveLeft;
     private DcMotor driveRight;
+    private ColorSensor color1;
+    /*private BNO055IMUImpl imu;
+    Orientation angles;
+    Acceleration gravity;
+    */
     static final double COUNTS_PER_MOTOR_REV = 1440;
     static final double DRIVE_GEAR_REDUCTION = 1.0;
-    static final double WHEEL_DIAMTETER_INCHES = 4.0;
+    static final double WHEEL_DIAMTETER_INCHES = 2.5;
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV*DRIVE_GEAR_REDUCTION)/(WHEEL_DIAMTETER_INCHES*3.1415);
     static final double DRIVE_SPEED = 0.6;
     static final double TURN_SPEED = 0.5;
     @Override
     public void runOpMode() throws InterruptedException {
+        /*BNO055IMUImpl.Parameters parameters = new BNO055IMUImpl.Parameters();
+        parameters.angleUnit = BNO055IMUImpl.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMUImpl.AccelUnit.METERS_PERSEC_PERSEC;
+        */
         System.out.println("====Andrew started ====");
         driveLeft = hardwareMap.dcMotor.get("driveLeft");
         System.out.println("====Andrew driveLeft ====");
         driveRight = hardwareMap.dcMotor.get("driveRight");
         System.out.println("====Andrew driveRight ====");
+        color1 = hardwareMap.colorSensor.get("color1");
         driveRight.setDirection(DcMotor.Direction.REVERSE);
         System.out.println("====Andrew REVERSE ====");
         telemetry.addData("Status","Resetting Encoders");
@@ -42,11 +59,21 @@ public class wcauto extends LinearOpMode {
         telemetry.update();
         waitForStart();
         System.out.println("====Andrew waitForStart ====");
-        for(int i=1;i<5;i++){
-            System.out.println("====loop started ====");
-            encoderDrive(DRIVE_SPEED, 48, 48, 5.0);
-            encoderDrive(TURN_SPEED, 9.7, -9.7, 4.0);
+        int calibrate = color1.alpha();
+        while(color1.alpha()<20+calibrate){
+            driveLeft.setPower(0.1);
+            driveRight.setPower(0.1);
+            telemetry.addData("color",color1.alpha());
+            telemetry.update();
         }
+        driveLeft.setPower(0);
+        driveRight.setPower(0);
+        sleep(1000);
+        driveLeft.setPower(0.1);
+        driveRight.setPower(-0.1);
+        sleep(900);
+        driveLeft.setPower(0);
+        driveRight.setPower(0);
     }
     public void encoderDrive(double speed, double leftinch, double rightinch, double timeout){
         int leftTarget;
