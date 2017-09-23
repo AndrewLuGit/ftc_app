@@ -1,26 +1,33 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
 /**
- * Teleop for Mechanum Drive
+ * Teleop for Mechanum Drive use as teleop
  */
-@TeleOp(name="mechanum",group="mechanum")
+@TeleOp(name="Mechanum Teleop",group="mechanum")
 public class mech_teleop extends OpMode {
     /*Declares drive motors: lf = left front,lb = left back,etc.*/
     private DcMotor drivelf;
     private DcMotor driverf;
     private DcMotor drivelb;
     private DcMotor driverb;
+    private CRServo grabber;
     @Override
     public void init() {
         drivelf = hardwareMap.dcMotor.get("drivelf");
         driverf = hardwareMap.dcMotor.get("driverf");
         drivelb = hardwareMap.dcMotor.get("drivelb");
         driverb = hardwareMap.dcMotor.get("driverb");
+        grabber = hardwareMap.crservo.get("garabber");
         drivelf.setDirection(DcMotorSimple.Direction.REVERSE);
         drivelb.setDirection(DcMotorSimple.Direction.REVERSE);
     }
@@ -63,6 +70,11 @@ public class mech_teleop extends OpMode {
             driverf.setPower(gamepad1.right_stick_x);
             drivelb.setPower(-gamepad1.right_stick_x);
             driverb.setPower(gamepad1.right_stick_x);
+        }
+        if(gamepad1.left_bumper){
+            grabber.setPower(1.0);
+        } else if(gamepad1.left_trigger>=0.5){
+            grabber.setPower(-1.0);
         }
     }
 }
