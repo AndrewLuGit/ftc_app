@@ -9,9 +9,10 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
 /**
- * Teleop for Mechanum Drive use as teleop
+ * Teleop for Mechanum Drive and Relic Recovery
  */
 @TeleOp(name="Mechanum Teleop",group="mechanum")
 public class mech_teleop extends OpMode {
@@ -21,13 +22,15 @@ public class mech_teleop extends OpMode {
     private DcMotor drivelb;
     private DcMotor driverb;
     private CRServo grabber;
+    private DcMotor grabberMotor;
     @Override
     public void init() {
         drivelf = hardwareMap.dcMotor.get("drivelf");
         driverf = hardwareMap.dcMotor.get("driverf");
         drivelb = hardwareMap.dcMotor.get("drivelb");
         driverb = hardwareMap.dcMotor.get("driverb");
-        grabber = hardwareMap.crservo.get("garabber");
+        grabber = hardwareMap.crservo.get("grabber");
+        grabberMotor = hardwareMap.dcMotor.get("grabberMotor");
         drivelf.setDirection(DcMotorSimple.Direction.REVERSE);
         drivelb.setDirection(DcMotorSimple.Direction.REVERSE);
     }
@@ -75,6 +78,17 @@ public class mech_teleop extends OpMode {
             grabber.setPower(1.0);
         } else if(gamepad1.left_trigger>=0.5){
             grabber.setPower(-1.0);
+        } else{
+            grabber.setPower(-0.01);
         }
+        if (gamepad1.right_bumper) {
+            grabberMotor.setPower(-1.0);
+        } else if (gamepad1.right_trigger >= 0.5) {
+            grabberMotor.setPower(1.0);
+        } else {
+            grabberMotor.setPower(0.0);
+        }
+        telemetry.addData("grabberPower",grabber.getPower());
+        telemetry.update();
     }
 }
