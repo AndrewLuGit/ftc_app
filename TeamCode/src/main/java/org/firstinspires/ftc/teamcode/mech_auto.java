@@ -42,7 +42,6 @@ public class mech_auto extends LinearOpMode {
     private LynxI2cColorRangeSensor colorRange;
     private BNO055IMU imu;
     private Orientation angles;
-    private double heading;
     private OpenGLMatrix lastLocation = null;
     private VuforiaLocalizer vuforia;
     @Override
@@ -71,46 +70,61 @@ public class mech_auto extends LinearOpMode {
         this.vuforia = ClassFactory.createVuforiaLocalizer(paramters2);
         VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
         VuforiaTrackable relicTemplate = relicTrackables.get(0);
-        imu.startAccelerationIntegration(new Position(), new Velocity(), 100);
-        jewelHitter.setPosition(0.34);
+        jewelHitter.setPosition(0);
         telemetry.addLine("Init Ready");
         telemetry.update();
         /* start of the code */
         waitForStart();
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         // Clear telemetry
         telemetry.clear();
         /* lower jewel hitter, wait until in position */
         telemetry.addData("Servo Position",jewelHitter.getPosition());
         telemetry.update();
         sleep(1000);
-        jewelHitter.setPosition(0.85);
-        while (jewelHitter.getPosition()!=0.85) {
+        jewelHitter.setPosition(0.55);
+        while (jewelHitter.getPosition()!=0.55) {
             sleep(500);
             telemetry.addData("Servo Position",jewelHitter.getPosition());
             telemetry.update();
         }
+        telemetry.addData("Degrees",angles.firstAngle);
+        telemetry.update();
+        telemetry.clear();
         sleep(500);
         /* Detect the color */
         if (colorRange.blue()>colorRange.red()) {
-            imudrive(-0.5,0.5,-0.5,0.5,15);
-            jewelHitter.setPosition(0.34);
-            while (jewelHitter.getPosition()!=0.34) {
+            sleep(1000);
+            telemetry.addLine("Blue");
+            telemetry.addData("Degrees1",15-angles.firstAngle);
+            telemetry.update();
+            imudrive(15,0.3);
+            sleep(500);
+            jewelHitter.setPosition(0);
+            while (jewelHitter.getPosition()!=0) {
                 sleep(500);
             }
-            imudrive(0.5,-0.5,0.5,-0.5,0);
+            imudrive(-15,0.3);
         } else if (colorRange.red()>colorRange.blue()) {
-            imudrive(0.5,-0.5,0.5,-0.5,-15);
-            jewelHitter.setPosition(0.34);
-            while (jewelHitter.getPosition()!=0.34) {
+            telemetry.addLine("Red");
+            telemetry.update();
+            imudrive(-15,0.3);
+            sleep(500);
+            jewelHitter.setPosition(0);
+            while (jewelHitter.getPosition()!=0) {
                 sleep(500);
             }
-            imudrive(-0.5,0.5,-0.5,0.5,0);
+            imudrive(15,0.3);
         } else {
-            jewelHitter.setPosition(0.34);
-            while (jewelHitter.getPosition()!=0.34) {
+            telemetry.addLine("Error");
+            telemetry.update();
+            jewelHitter.setPosition(0);
+            while (jewelHitter.getPosition()!=0) {
                 sleep(500);
             }
         }
+        drivetime(1,1,1,1,1000);
         /* scan the pictograph */
         /*RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
         while (vuMark==RelicRecoveryVuMark.UNKNOWN){
@@ -130,34 +144,30 @@ public class mech_auto extends LinearOpMode {
         /*score*/
         imu.stopAccelerationIntegration();
     }
-    private void imudrive(double lfPower,double rfPower, double lbPower, double rbPower,double turnDegrees){
-        if (heading>turnDegrees) {
-            while (heading>turnDegrees){
-                angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                heading = AngleUnit.DEGREES.normalize(AngleUnit.DEGREES.fromUnit(angles.angleUnit,angles.firstAngle));
-                drivelf.setPower(lfPower);
-                driverf.setPower(rfPower);
-                drivelb.setPower(lbPower);
-                driverb.setPower(rbPower);
-                telemetry.addData("Heading",heading);
-                telemetry.update();
-            }
-        } else if (heading<turnDegrees) {
-            while (heading<turnDegrees){
-                angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                heading = AngleUnit.DEGREES.normalize(AngleUnit.DEGREES.fromUnit(angles.angleUnit,angles.firstAngle));
-                drivelf.setPower(lfPower);
-                driverf.setPower(rfPower);
-                drivelb.setPower(lbPower);
-                driverb.setPower(rbPower);
-                telemetry.addData("Heading",heading);
-                telemetry.update();
-            }
+    private void imudrive(double turnDegrees,double k1){
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        double initDegrees = angles.firstAngle;
+        double pwr = 0;
+        double currDegrees = angles.firstAngle;
+        double tarDegrees = initDegrees + turnDegrees;
+        while (Math.abs(tarDegrees-currDegrees)>5){
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            currDegrees = angles.firstAngle;
+            pwr = k1*(tarDegrees-currDegrees)/15;
+            drivelf.setPower(-pwr);
+            driverf.setPower(pwr);
+            drivelb.setPower(-pwr);
+            driverb.setPower(pwr);
+            telemetry.addData("Degrees1",tarDegrees-currDegrees);
+            telemetry.addData("Power",pwr);
+            telemetry.addData("Degrees",currDegrees);
+            telemetry.update();
         }
         drivelf.setPower(0.0);
         driverf.setPower(0.0);
         drivelb.setPower(0.0);
         driverb.setPower(0.0);
+        telemetry.clear();
     }
     private void drivetime(double lfPower,double rfPower, double lbPower, double rbPower,long milliseconds){
         drivelf.setPower(lfPower);
