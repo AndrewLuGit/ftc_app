@@ -28,6 +28,7 @@ public class mech_teleop2 extends LinearOpMode {
     private DcMotor grabberMotor;
     private Servo jewelHitter;
     private double jhPos;
+    private double k = 1;
     @Override
     public void runOpMode() throws InterruptedException {
         drivelf = hardwareMap.dcMotor.get("drivelf");
@@ -44,11 +45,7 @@ public class mech_teleop2 extends LinearOpMode {
         driverf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         drivelb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         driverb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        drivelf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        driverf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        drivelb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        driverb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        jewelHitter.setPosition(0.5);
+        jewelHitter.setPosition(0);
         waitForStart();
         while (opModeIsActive()){
             //Math wizardry
@@ -59,10 +56,10 @@ public class mech_teleop2 extends LinearOpMode {
         final double v2 = r * Math.sin(robotAngle) - rightX;
         final double v3 = r * Math.sin(robotAngle) + rightX;
         final double v4 = r * Math.cos(robotAngle) - rightX;
-        drivelf.setPower(v2);
-        driverf.setPower(v1);
-        drivelb.setPower(v4);
-        driverb.setPower(v3);
+        drivelf.setPower(k*v2);
+        driverf.setPower(k*v1);
+        drivelb.setPower(k*v4);
+        driverb.setPower(k*v3);
             if(gamepad1.left_bumper || gamepad2.left_bumper){
                     grabber.setPower(1.0);
             } else if(gamepad1.left_trigger>=0.5 || gamepad2.left_trigger>=0.5){
@@ -82,6 +79,11 @@ public class mech_teleop2 extends LinearOpMode {
                 jewelHitter.setPosition(jhPos+0.01);
             } else if (gamepad1.b||gamepad2.b) {
                 jewelHitter.setPosition(jhPos-0.01);
+            }
+            if (gamepad1.dpad_up) {
+                k = 1;
+            } else if (gamepad1.dpad_down) {
+                k = 0.3;
             }
             telemetry.addData("jhPos",jewelHitter.getPosition());
             telemetry.update();

@@ -32,7 +32,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
  * Autonomous for Relic Recovery
  */
 @Autonomous(name="Mechanum Autonomous",group="mechanum")
-public class mech_auto extends LinearOpMode {
+public class mech_auto_red1 extends LinearOpMode {
     private DcMotor drivelf;
     private DcMotor driverf;
     private DcMotor drivelb;
@@ -66,81 +66,81 @@ public class mech_auto extends LinearOpMode {
         imu.initialize(parameters);
         VuforiaLocalizer.Parameters paramters2 = new VuforiaLocalizer.Parameters();
         paramters2.vuforiaLicenseKey = "AVpbLJb/////AAAAGXZuk17KREdul0PqldXjI4ETC+yUOY/0Kn2QZcusavTR02WKxGvyI4E5oodS5Jta30WYJtnJuH7AhLaMe8grr9UC2U3qlnQkypIAZsR8xa38f669mVIo9wujvkZpHzvscPZGdZ2NaheUepxU/asMbuldnDOo3TjSYiiEbk1N3OkxdTeMa4W+BOyrO6sD8L7bcPfnFpmuOPRv0+NeEUL638AjNyi+GQeHYaSLsu6u4ONKtwF+axjjg0W+LRgp5T/5oWxexW3fgoMrkijzsJ0I5OuxSdCeZ3myJthxcyHwHqdhuxmWFvFOoYgJ4k6LdGNijymNWqMp97utjg8YXMAguMLJU2QkPJvZQqbkzIdjzzQk";
-        paramters2.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        paramters2.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
         this.vuforia = ClassFactory.createVuforiaLocalizer(paramters2);
         VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
         VuforiaTrackable relicTemplate = relicTrackables.get(0);
-        jewelHitter.setPosition(0);
+        jewelHitter.setPosition(0.05);
         telemetry.addLine("Init Ready");
         telemetry.update();
         /* start of the code */
         waitForStart();
+        relicTrackables.activate();
         imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         // Clear telemetry
         telemetry.clear();
+        grabber.setPower(-0.01);
         /* lower jewel hitter, wait until in position */
-        telemetry.addData("Servo Position",jewelHitter.getPosition());
-        telemetry.update();
-        sleep(1000);
         jewelHitter.setPosition(0.55);
         while (jewelHitter.getPosition()!=0.55) {
             sleep(500);
             telemetry.addData("Servo Position",jewelHitter.getPosition());
             telemetry.update();
         }
-        telemetry.addData("Degrees",angles.firstAngle);
-        telemetry.update();
-        telemetry.clear();
         sleep(500);
         /* Detect the color */
         if (colorRange.blue()>colorRange.red()) {
-            sleep(1000);
             telemetry.addLine("Blue");
-            telemetry.addData("Degrees1",15-angles.firstAngle);
             telemetry.update();
-            imudrive(15,0.3);
+            imudrive(-15,0.3);
             sleep(500);
-            jewelHitter.setPosition(0);
-            while (jewelHitter.getPosition()!=0) {
+            jewelHitter.setPosition(0.05);
+            while (jewelHitter.getPosition()!=0.05) {
                 sleep(500);
             }
-            imudrive(-15,0.3);
+            imudrive(15,0.3);
         } else if (colorRange.red()>colorRange.blue()) {
             telemetry.addLine("Red");
             telemetry.update();
-            imudrive(-15,0.3);
+            imudrive(15,0.3);
             sleep(500);
-            jewelHitter.setPosition(0);
-            while (jewelHitter.getPosition()!=0) {
+            jewelHitter.setPosition(0.05);
+            while (jewelHitter.getPosition()!=0.05) {
                 sleep(500);
             }
-            imudrive(15,0.3);
+            imudrive(-15,0.3);
         } else {
             telemetry.addLine("Error");
             telemetry.update();
-            jewelHitter.setPosition(0);
-            while (jewelHitter.getPosition()!=0) {
+            jewelHitter.setPosition(0.05);
+            while (jewelHitter.getPosition()!=0.05) {
                 sleep(500);
             }
         }
-        drivetime(1,1,1,1,1000);
+        drivetime(0.5,0.5,0.5,0.5,300);
         /* scan the pictograph */
-        /*RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-        while (vuMark==RelicRecoveryVuMark.UNKNOWN){
+        RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+        while (vuMark == RelicRecoveryVuMark.UNKNOWN) {
+            telemetry.addLine("Scanning");
+            telemetry.update();
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
-            telemetry.addData("vuMark",RelicRecoveryVuMark.from(relicTemplate));
+        }
+        vuMark = RelicRecoveryVuMark.from(relicTemplate);
+        /*drive to cryptobox */
+        drivetime(1.0,1.0,1.0,1.0,1000);
+        imudrive(90,0.5);
+        drivetime(-0.5,-0.5,-0.5,-0.5,1000);
+        if (vuMark==RelicRecoveryVuMark.LEFT){
+            telemetry.addLine("Left");
+            telemetry.update();
+        } else if (vuMark==RelicRecoveryVuMark.CENTER){
+            telemetry.addLine("Center");
+            telemetry.update();
+        } else if (vuMark==RelicRecoveryVuMark.RIGHT) {
+            telemetry.addLine("Right");
             telemetry.update();
         }
-        /*drive to cryptobox */
-        //drivetime(-0.5,-0.5,-0.5,-0.5,1000);
-        /*if (vuMark==RelicRecoveryVuMark.LEFT){
-
-        } else if (vuMark==RelicRecoveryVuMark.CENTER){
-
-        } else if (vuMark==RelicRecoveryVuMark.RIGHT) {
-
-        }*/
         /*score*/
         imu.stopAccelerationIntegration();
     }
@@ -153,7 +153,20 @@ public class mech_auto extends LinearOpMode {
         while (Math.abs(tarDegrees-currDegrees)>5){
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             currDegrees = angles.firstAngle;
-            pwr = k1*(tarDegrees-currDegrees)/15;
+            if (turnDegrees==0) {
+                break;
+            }
+            if (Math.abs(turnDegrees)==turnDegrees){
+                pwr = k1*(tarDegrees-currDegrees)/(tarDegrees-initDegrees);
+                if (pwr<0.2) {
+                    pwr=0.2;
+                }
+            } else if (Math.abs(turnDegrees)==-turnDegrees) {
+                pwr = -k1*(tarDegrees-currDegrees)/(tarDegrees-initDegrees);
+                if (pwr>-0.2) {
+                    pwr=-0.2;
+                }
+            }
             drivelf.setPower(-pwr);
             driverf.setPower(pwr);
             drivelb.setPower(-pwr);
