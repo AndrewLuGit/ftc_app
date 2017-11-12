@@ -80,7 +80,7 @@ public class mech_auto_red1 extends LinearOpMode {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         // Clear telemetry
         telemetry.clear();
-        grabber.setPower(-0.01);
+        grabber.setPower(-0.1);
         /* lower jewel hitter, wait until in position */
         jewelHitter.setPosition(0.55);
         while (jewelHitter.getPosition()!=0.55) {
@@ -118,30 +118,46 @@ public class mech_auto_red1 extends LinearOpMode {
                 sleep(500);
             }
         }
-        drivetime(0.5,0.5,0.5,0.5,300);
         /* scan the pictograph */
         RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+        drivelf.setPower(0.2);
+        drivelb.setPower(0.2);
+        driverf.setPower(0.2);
+        driverb.setPower(0.2);
         while (vuMark == RelicRecoveryVuMark.UNKNOWN) {
             telemetry.addLine("Scanning");
             telemetry.update();
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
         }
+        drivelf.setPower(0);
+        drivelb.setPower(0);
+        driverf.setPower(0);
+        driverb.setPower(0);
         vuMark = RelicRecoveryVuMark.from(relicTemplate);
         /*drive to cryptobox */
         drivetime(1.0,1.0,1.0,1.0,1000);
         imudrive(90,0.5);
-        drivetime(-0.5,-0.5,-0.5,-0.5,1000);
+        drivetime(-0.5,-0.5,-0.5,-0.5,1500);
         if (vuMark==RelicRecoveryVuMark.LEFT){
             telemetry.addLine("Left");
             telemetry.update();
+            drivetime(0.5,0.5,0.5,0.5,2100);
         } else if (vuMark==RelicRecoveryVuMark.CENTER){
             telemetry.addLine("Center");
             telemetry.update();
+            drivetime(0.5,0.5,0.5,0.5,1850);
         } else if (vuMark==RelicRecoveryVuMark.RIGHT) {
             telemetry.addLine("Right");
             telemetry.update();
+            drivetime(0.5,0.5,0.5,0.5,1500);
         }
         /*score*/
+        imudrive(-90,0.5);
+        drivetime(0.5,0.5,0.5,0.5,500);
+        grabber.setPower(0.5);
+        sleep(1000);
+        grabber.setPower(-0.01);
+        drivetime(-0.5,-0.5,-0.5,-0.5,300);
         imu.stopAccelerationIntegration();
     }
     private void imudrive(double turnDegrees,double k1){
