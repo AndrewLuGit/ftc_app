@@ -39,6 +39,10 @@ public class mech_auto_red1 extends LinearOpMode {
     private Orientation angles;
     private OpenGLMatrix lastLocation = null;
     private VuforiaLocalizer vuforia;
+    private boolean myTeamRed = true;
+    private int myBSPosition = 1; /* 1: top lfts 2: top right 3: bottom lfts 4:bootom right */
+    private int myPitLocation = 0;    /* 1 : lfts 0: center -1 : right */
+
     @Override
     public void runOpMode() throws InterruptedException {
         drivelf = hardwareMap.dcMotor.get("drivelf");
@@ -82,75 +86,20 @@ public class mech_auto_red1 extends LinearOpMode {
         grabberMotor.setPower(0);
         /* lower jewel hitter, wait until in position */
         jewelHitter.setPosition(0.55);
+
         while (jewelHitter.getPosition()!=0.55) {
             sleep(500);
             telemetry.addData("Servo Position",jewelHitter.getPosition());
             telemetry.update();
         }
-        sleep(500);
-        /* Detect the color */
-        if (colorRange.blue()>colorRange.red()) {
-            telemetry.addLine("Blue");
-            telemetry.update();
-            imudrive(-15,0.3);
-            sleep(500);
-            jewelHitter.setPosition(0.05);
-            while (jewelHitter.getPosition()!=0.05) {
-                sleep(500);
-            }
-            imudrive(15,0.3);
-        } else if (colorRange.red()>colorRange.blue()) {
-            telemetry.addLine("Red");
-            telemetry.update();
-            imudrive(15,0.3);
-            sleep(500);
-            jewelHitter.setPosition(0.05);
-            while (jewelHitter.getPosition()!=0.05) {
-                sleep(500);
-            }
-            imudrive(-15,0.3);
-        } else {
-            telemetry.addLine("Error");
-            telemetry.update();
-            jewelHitter.setPosition(0.05);
-            while (jewelHitter.getPosition()!=0.05) {
-                sleep(500);
-            }
-        }
-        /* scan the pictograph */
-        RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-        imudrive(15,0.3);
-        while (vuMark == RelicRecoveryVuMark.UNKNOWN) {
-            telemetry.addLine("Scanning");
-            telemetry.update();
-            vuMark = RelicRecoveryVuMark.from(relicTemplate);
-        }
-        vuMark = RelicRecoveryVuMark.from(relicTemplate);
-        imudrive(-15,0.3);
-        /*drive to cryptobox */
-        drivetime(1.0,1.0,1.0,1.0,1500);
-        imudrive(90,0.5);
-        drivetime(-0.3,-0.3,-0.3,-0.3,2000);
-        if (vuMark==RelicRecoveryVuMark.LEFT){
-            telemetry.addLine("Left");
-            telemetry.update();
-            drivetime(0.5,0.5,0.5,0.5,2450);
-        } else if (vuMark==RelicRecoveryVuMark.CENTER){
-            telemetry.addLine("Center");
-            telemetry.update();
-            drivetime(0.5,0.5,0.5,0.5,1900);
-        } else if (vuMark==RelicRecoveryVuMark.RIGHT) {
-            telemetry.addLine("Right");
-            telemetry.update();
-            drivetime(0.5,0.5,0.5,0.5,1350);
-        }
-        /*score*/
-        imudrive(-90,0.5);
-        drivetime(0.5,0.5,0.5,0.5,700);
-        grabber.setPower(1.0);
-        sleep(2000);
-        grabber.setPower(-0.01);
-        drivetime(-0.5,-0.5,-0.5,-0.5,300);
+
+
+        kickOpponentJewel(myTeamRed);
+        /* get my pit location by scan the Vulmark */
+        /* get to the right postion before unload Glyphs */
+        scorePositioning();
+        /* unloading */
+        scoreGlyphs();
         imu.stopAccelerationIntegration();
     }
     private void imudrive(double turnDegrees,double k1){
@@ -201,5 +150,158 @@ public class mech_auto_red1 extends LinearOpMode {
         driverf.setPower(0.0);
         drivelb.setPower(0.0);
         driverb.setPower(0.0);
+    }
+
+    private void kickLeft(boolean isLeft)
+    {
+        if (isLeft) {
+            telemetry.addLine("kick left");
+            imudrive(-15,0.3);
+            sleep(500);
+            imudrive(15,0.3);
+        } else {
+            telemetry.addLine("kick right");
+            imudrive(15,0.3);
+            sleep(500);
+            imudrive(-15,0.3);
+        }
+    }
+
+    private boolean redAtRight() {
+        if (colorRange.red()>colorRange.blue()) {
+            telemetry.addLine("red at right");
+            return true;
+        } else {
+            telemetry.addLine("red at left");
+            return false;
+        }
+    }
+
+    private void kickOpponentJewel(boolean teamRed) {
+         /* Detect the color */
+        jewelHitter.setPosition(0.05);
+        /* ? really need sleep */
+        sleep(500);
+        if (teamRed) {
+            telemetry.addLine("Team red");
+            /* kick blue */
+            if (redAtRight()) {
+                kickLeft(true);
+            } else {
+                kickLeft(false);
+            }
+        } else { /*kick red */
+            telemetry.addLine("Team blue");
+            if (redAtRight()) {
+                kickLeft(false);
+            } else {
+                kickLeft(true);
+            }
+        }
+        telemetry.update();
+    }
+
+
+    private void updateMyPitLocation() {
+        VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        VuforiaTrackable relicTemplate = relicTrackables.get(0);
+        relicTrackables.activate();
+        RelicRecoveryVuMark vuMark= RelicRecoveryVuMark.UNKNOWN;
+        RelicRecoveryVuMark vuMark1;
+        imudrive(20,0.3);
+        telemetry.addLine("Scanning");
+        telemetry.update();
+
+        while (vuMark == RelicRecoveryVuMark.UNKNOWN) {
+            /* may need sleep */
+            vuMark = RelicRecoveryVuMark.from(relicTemplate);
+        }
+        vuMark1 =  RelicRecoveryVuMark.from(relicTemplate);
+
+        while (vuMark != vuMark1) {
+            vuMark = RelicRecoveryVuMark.from(relicTemplate);
+            vuMark1 =  RelicRecoveryVuMark.from(relicTemplate);
+        }
+        imudrive(-20,0.3);
+        if (vuMark==RelicRecoveryVuMark.LEFT){
+            telemetry.addLine("Left");
+            myPitLocation = 1;
+        } else if (vuMark==RelicRecoveryVuMark.CENTER){
+            telemetry.addLine("Center");
+            myPitLocation = 0;
+        } else if (vuMark==RelicRecoveryVuMark.RIGHT) {
+            telemetry.addLine("Right");
+            myPitLocation = -1;
+        }
+        telemetry.update();
+    }
+
+    private void getOffAdjust() {
+        if (myBSPosition == 1) {
+            drivetime(1.0,1.0,1.0,1.0,1500);
+            imudrive(90,0.5);
+        } else if (myBSPosition == 2) {
+            drivetime(-1.0,-1.0,-1.0,-1.0,1500);
+        } else if (myBSPosition == 3) {
+            drivetime(-1.0,-1.0,-1.0,-1.0,1500);
+            imudrive(90,0.5);
+        } else {
+            imudrive(90,0.5);
+            imudrive(90,0.5);
+            drivetime(-1.0,-1.0,-1.0,-1.0,1500);
+        }
+        /* bump adjust */
+        drivetime(-0.3,-0.3,-0.3,-0.3,2000);
+    }
+
+
+    private void adjustScoreAngel() {
+        if ((myBSPosition == 1) || (myBSPosition == 2) ) {
+            imudrive(-90,0.5);
+        } else {
+            imudrive(90,0.5);
+        }
+    }
+
+    private int LocationOffset() {
+        int offset = 0;
+
+        if (myPitLocation == 1) {
+            offset = 540;
+        } else if(myPitLocation == -1) {
+            offset = -540;
+        }
+        if(myBSPosition == 2 ) {
+            offset += 1000;
+        } else if ( myBSPosition == 3 ) {
+            offset = 0 - offset;
+        } else if (myBSPosition == 4) {
+            offset = 0 - offset;
+            offset += 1000;
+        }
+
+        return offset;
+
+    }
+
+    private void scorePositioning() {
+
+         /*drive to cryptobox */
+        int offset;
+
+        getOffAdjust();
+
+        offset = LocationOffset();
+        drivetime(0.5, 0.5, 0.5, 0.5, (1890 + offset));
+        adjustScoreAngel();
+    }
+    private void scoreGlyphs() {
+
+        drivetime(0.5,0.5,0.5,0.5,700);
+        grabber.setPower(1.0);
+        sleep(2000);
+        grabber.setPower(-0.01);
+        drivetime(-0.5,-0.5,-0.5,-0.5,300);
+
     }
 }
