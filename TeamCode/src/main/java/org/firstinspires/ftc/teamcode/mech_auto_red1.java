@@ -6,20 +6,14 @@ import com.qualcomm.hardware.lynx.LynxI2cColorRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcontroller.external.samples.SensorColor;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
@@ -120,24 +114,18 @@ public class mech_auto_red1 extends LinearOpMode {
         }
         /* scan the pictograph */
         RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-        drivelf.setPower(0.2);
-        drivelb.setPower(0.2);
-        driverf.setPower(0.2);
-        driverb.setPower(0.2);
+        imudrive(20,0.3);
         while (vuMark == RelicRecoveryVuMark.UNKNOWN) {
             telemetry.addLine("Scanning");
             telemetry.update();
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
         }
-        drivelf.setPower(0);
-        drivelb.setPower(0);
-        driverf.setPower(0);
-        driverb.setPower(0);
         vuMark = RelicRecoveryVuMark.from(relicTemplate);
+        imudrive(-20,0.3);
         /*drive to cryptobox */
-        drivetime(1.0,1.0,1.0,1.0,1000);
+        drivetime(1.0,1.0,1.0,1.0,1500);
         imudrive(90,0.5);
-        drivetime(-0.5,-0.5,-0.5,-0.5,1500);
+        drivetime(-0.3,-0.3,-0.3,-0.3,2000);
         if (vuMark==RelicRecoveryVuMark.LEFT){
             telemetry.addLine("Left");
             telemetry.update();
@@ -145,17 +133,17 @@ public class mech_auto_red1 extends LinearOpMode {
         } else if (vuMark==RelicRecoveryVuMark.CENTER){
             telemetry.addLine("Center");
             telemetry.update();
-            drivetime(0.5,0.5,0.5,0.5,1850);
+            drivetime(0.5,0.5,0.5,0.5,1890);
         } else if (vuMark==RelicRecoveryVuMark.RIGHT) {
             telemetry.addLine("Right");
             telemetry.update();
-            drivetime(0.5,0.5,0.5,0.5,1500);
+            drivetime(0.5,0.5,0.5,0.5,1350);
         }
         /*score*/
         imudrive(-90,0.5);
-        drivetime(0.5,0.5,0.5,0.5,500);
-        grabber.setPower(0.5);
-        sleep(1000);
+        drivetime(0.5,0.5,0.5,0.5,700);
+        grabber.setPower(1.0);
+        sleep(2000);
         grabber.setPower(-0.01);
         drivetime(-0.5,-0.5,-0.5,-0.5,300);
         imu.stopAccelerationIntegration();
