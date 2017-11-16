@@ -25,8 +25,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 /**
  * Autonomous for Relic Recovery
  */
-@Autonomous(name="Red 1",group="mechanum")
-public class mech_auto_red1 extends LinearOpMode {
+@Autonomous(name="Red 2",group="mechanum")
+public class mech_auto_red2 extends LinearOpMode {
     private DcMotor drivelf;
     private DcMotor driverf;
     private DcMotor drivelb;
@@ -121,15 +121,14 @@ public class mech_auto_red1 extends LinearOpMode {
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
         }
         vuMark = RelicRecoveryVuMark.from(relicTemplate);
-        imudrive(-20,0.3);
+        imudrive(-15,0.3);
         /*drive to cryptobox */
         drivetime(1.0,1.0,1.0,1.0,1500);
-        imudrive(90,0.5);
-        drivetime(-0.3,-0.3,-0.3,-0.3,2000);
+        /*
         if (vuMark==RelicRecoveryVuMark.LEFT){
             telemetry.addLine("Left");
             telemetry.update();
-            drivetime(0.5,0.5,0.5,0.5,2450);
+            drivetime(0.5,0.5,0.5,0.5,2100);
         } else if (vuMark==RelicRecoveryVuMark.CENTER){
             telemetry.addLine("Center");
             telemetry.update();
@@ -140,12 +139,14 @@ public class mech_auto_red1 extends LinearOpMode {
             drivetime(0.5,0.5,0.5,0.5,1350);
         }
         /*score*/
+        /*
         imudrive(-90,0.5);
         drivetime(0.5,0.5,0.5,0.5,700);
         grabber.setPower(1.0);
         sleep(2000);
         grabber.setPower(-0.01);
         drivetime(-0.5,-0.5,-0.5,-0.5,300);
+        */
         imu.stopAccelerationIntegration();
     }
     private void imudrive(double turnDegrees,double k1){
