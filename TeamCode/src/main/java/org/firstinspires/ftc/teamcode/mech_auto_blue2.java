@@ -11,7 +11,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -21,14 +20,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 /**
  * Autonomous for Relic Recovery
  */
-@Autonomous(name="Red 2",group="mechanum")
-public class mech_auto_red2 extends LinearOpMode {
+@Autonomous(name="Blue 2",group="mechanum")
+public class mech_auto_blue2 extends LinearOpMode {
     private DcMotor drivelf;
     private DcMotor driverf;
     private DcMotor drivelb;
@@ -98,23 +96,23 @@ public class mech_auto_red2 extends LinearOpMode {
         if (colorRange.blue()>colorRange.red()) {
             telemetry.addLine("Blue");
             telemetry.update();
-            imudrive(-15,0.3);
+            imudrive(15,0.3);
             sleep(500);
             jewelHitter.setPosition(0.05);
             while (jewelHitter.getPosition()!=0.05) {
                 sleep(500);
             }
-            imudrive(15,0.3);
+            imudrive(-15,0.3);
         } else if (colorRange.red()>colorRange.blue()) {
             telemetry.addLine("Red");
             telemetry.update();
-            imudrive(15,0.3);
+            imudrive(-15,0.3);
             sleep(500);
             jewelHitter.setPosition(0.05);
             while (jewelHitter.getPosition()!=0.05) {
                 sleep(500);
             }
-            imudrive(-15,0.3);
+            imudrive(15,0.3);
         } else {
             telemetry.addLine("Error");
             telemetry.update();
@@ -129,16 +127,20 @@ public class mech_auto_red2 extends LinearOpMode {
             telemetry.addLine("Scanning");
             telemetry.update();
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
-            drivelf.setPower(0.2);
-            driverf.setPower(0.2);
-            drivelb.setPower(0.2);
-            driverb.setPower(0.2);
         }
+        vuMark = RelicRecoveryVuMark.from(relicTemplate);
         drivelf.setPower(0);
         driverf.setPower(0);
         drivelb.setPower(0);
         driverb.setPower(0);
-        drivetime(1.0,1.01,1.0,1.0,1450);
+        imudrive(-90,0.5);
+        drivetime(-1.0,-1.0,-1.0,-1.0,1100);
+        imudrive(-90,0.5);
+        drivetime(-0.3,-0.3,-0.3,-0.3,2000);
+        drivetime(1.0,1.0,1.0,1.0,3000);
+        imudrive(45,0.5);
+        drivetime(0.5,0.5,0.5,0.5,1000);
+        imudrive(-45,0.5);
         if (vuMark==RelicRecoveryVuMark.LEFT){
             telemetry.addLine("Left");
             telemetry.update();

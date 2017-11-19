@@ -11,7 +11,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -21,14 +20,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 /**
  * Autonomous for Relic Recovery
  */
-@Autonomous(name="Red 2",group="mechanum")
-public class mech_auto_red2 extends LinearOpMode {
+@Autonomous(name="Blue 1",group="mechanum")
+public class mech_auto_blue1 extends LinearOpMode {
     private DcMotor drivelf;
     private DcMotor driverf;
     private DcMotor drivelb;
@@ -38,8 +36,8 @@ public class mech_auto_red2 extends LinearOpMode {
     private LynxI2cColorRangeSensor colorRange;
     private BNO055IMU imu;
     private Orientation angles;
-    private VuforiaLocalizer vuforia;
     private OpenGLMatrix lastLocation = null;
+    private VuforiaLocalizer vuforia;
     @Override
     public void runOpMode() throws InterruptedException {
         drivelf = hardwareMap.dcMotor.get("drivelf");
@@ -48,15 +46,9 @@ public class mech_auto_red2 extends LinearOpMode {
         driverb = hardwareMap.dcMotor.get("driverb");
         driverf.setDirection(DcMotor.Direction.REVERSE);
         driverb.setDirection(DcMotor.Direction.REVERSE);
-        telemetry.addLine("Motor Init");
-        telemetry.update();
         grabber = hardwareMap.crservo.get("grabber");
         jewelHitter = hardwareMap.servo.get("jewelHitter");
-        telemetry.addLine("Servo Init");
-        telemetry.update();
         colorRange = (LynxI2cColorRangeSensor) hardwareMap.get("color");
-        telemetry.addLine("Color Init");
-        telemetry.update();
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
@@ -66,15 +58,12 @@ public class mech_auto_red2 extends LinearOpMode {
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
         imu = hardwareMap.get(BNO055IMU.class,"imu");
         imu.initialize(parameters);
-        telemetry.addLine("IMU Init");
-        telemetry.update();
         VuforiaLocalizer.Parameters paramters2 = new VuforiaLocalizer.Parameters();
         paramters2.vuforiaLicenseKey = "AVpbLJb/////AAAAGXZuk17KREdul0PqldXjI4ETC+yUOY/0Kn2QZcusavTR02WKxGvyI4E5oodS5Jta30WYJtnJuH7AhLaMe8grr9UC2U3qlnQkypIAZsR8xa38f669mVIo9wujvkZpHzvscPZGdZ2NaheUepxU/asMbuldnDOo3TjSYiiEbk1N3OkxdTeMa4W+BOyrO6sD8L7bcPfnFpmuOPRv0+NeEUL638AjNyi+GQeHYaSLsu6u4ONKtwF+axjjg0W+LRgp5T/5oWxexW3fgoMrkijzsJ0I5OuxSdCeZ3myJthxcyHwHqdhuxmWFvFOoYgJ4k6LdGNijymNWqMp97utjg8YXMAguMLJU2QkPJvZQqbkzIdjzzQk";
         paramters2.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
         this.vuforia = ClassFactory.createVuforiaLocalizer(paramters2);
         VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
         VuforiaTrackable relicTemplate = relicTrackables.get(0);
-        telemetry.addLine("Vuforia Init");
         jewelHitter.setPosition(0.05);
         telemetry.addLine("Init Ready");
         telemetry.update();
@@ -98,23 +87,23 @@ public class mech_auto_red2 extends LinearOpMode {
         if (colorRange.blue()>colorRange.red()) {
             telemetry.addLine("Blue");
             telemetry.update();
-            imudrive(-15,0.3);
+            imudrive(15,0.3);
             sleep(500);
             jewelHitter.setPosition(0.05);
             while (jewelHitter.getPosition()!=0.05) {
                 sleep(500);
             }
-            imudrive(15,0.3);
+            imudrive(-15,0.3);
         } else if (colorRange.red()>colorRange.blue()) {
             telemetry.addLine("Red");
             telemetry.update();
-            imudrive(15,0.3);
+            imudrive(-15,0.3);
             sleep(500);
             jewelHitter.setPosition(0.05);
             while (jewelHitter.getPosition()!=0.05) {
                 sleep(500);
             }
-            imudrive(-15,0.3);
+            imudrive(15,0.3);
         } else {
             telemetry.addLine("Error");
             telemetry.update();
@@ -125,43 +114,41 @@ public class mech_auto_red2 extends LinearOpMode {
         }
         /* scan the pictograph */
         RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+        imudrive(15,0.3);
         while (vuMark == RelicRecoveryVuMark.UNKNOWN) {
             telemetry.addLine("Scanning");
             telemetry.update();
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
-            drivelf.setPower(0.2);
-            driverf.setPower(0.2);
-            drivelb.setPower(0.2);
-            driverb.setPower(0.2);
         }
-        drivelf.setPower(0);
-        driverf.setPower(0);
-        drivelb.setPower(0);
-        driverb.setPower(0);
-        drivetime(1.0,1.01,1.0,1.0,1450);
+        vuMark = RelicRecoveryVuMark.from(relicTemplate);
+        imudrive(-15,0.3);
+        /*drive to cryptobox */
+        drivetime(-1.0,-1.0,-1.0,-1.0,1600);
+        imudrive(90,0.5);
+        drivetime(-0.3,-0.3,-0.3,-0.3,2000);
         if (vuMark==RelicRecoveryVuMark.LEFT){
             telemetry.addLine("Left");
             telemetry.update();
-            drivetime(0.5,0.5,0.5,0.5,1100);
+            drivetime(0.5,0.5,0.5,0.5,1300);
         } else if (vuMark==RelicRecoveryVuMark.CENTER){
             telemetry.addLine("Center");
             telemetry.update();
-            drivetime(0.5,0.5,0.5,0.5,550);
+            drivetime(0.5,0.5,0.5,0.5,1850);
         } else if (vuMark==RelicRecoveryVuMark.RIGHT) {
             telemetry.addLine("Right");
-            telemetry.addLine("Everybody wants to rule the world");
             telemetry.update();
+            drivetime(0.5,0.5,0.5,0.5,2400);
         }
         /*score*/
-        imudrive(-90,0.5);
-        drivetime(0.5,0.5,0.5,0.5,1000);
+        imudrive(90,0.5);
+        drivetime(0.5,0.5,0.5,0.5,700);
         grabber.setPower(1.0);
         sleep(2000);
         grabber.setPower(-0.01);
         drivetime(-0.5,-0.5,-0.5,-0.5,300);
         imu.stopAccelerationIntegration();
     }
-    private void imudrive(float turnDegrees,double k1){
+    private void imudrive(double turnDegrees,double k1){
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double initDegrees = angles.firstAngle;
         double pwr = 0;

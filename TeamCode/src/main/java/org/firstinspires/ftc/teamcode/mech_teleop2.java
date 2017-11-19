@@ -45,7 +45,7 @@ public class mech_teleop2 extends LinearOpMode {
         driverf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         drivelb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         driverb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        jewelHitter.setPosition(0);
+        jewelHitter.setPosition(0.05);
         waitForStart();
         while (opModeIsActive()){
             //Math wizardry

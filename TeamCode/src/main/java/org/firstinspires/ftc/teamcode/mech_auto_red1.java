@@ -34,6 +34,7 @@ public class mech_auto_red1 extends LinearOpMode {
     private CRServo grabber;
     private Servo jewelHitter;
     private LynxI2cColorRangeSensor colorRange;
+    private DcMotor grabberMotor;
     private BNO055IMU imu;
     private Orientation angles;
     private OpenGLMatrix lastLocation = null;
@@ -47,6 +48,7 @@ public class mech_auto_red1 extends LinearOpMode {
         driverf.setDirection(DcMotor.Direction.REVERSE);
         driverb.setDirection(DcMotor.Direction.REVERSE);
         grabber = hardwareMap.crservo.get("grabber");
+        grabberMotor = hardwareMap.dcMotor.get("grabberMotor");
         jewelHitter = hardwareMap.servo.get("jewelHitter");
         colorRange = (LynxI2cColorRangeSensor) hardwareMap.get("color");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -75,6 +77,9 @@ public class mech_auto_red1 extends LinearOpMode {
         // Clear telemetry
         telemetry.clear();
         grabber.setPower(-0.1);
+        grabberMotor.setPower(-0.5);
+        sleep(500);
+        grabberMotor.setPower(0);
         /* lower jewel hitter, wait until in position */
         jewelHitter.setPosition(0.55);
         while (jewelHitter.getPosition()!=0.55) {
@@ -121,7 +126,7 @@ public class mech_auto_red1 extends LinearOpMode {
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
         }
         vuMark = RelicRecoveryVuMark.from(relicTemplate);
-        imudrive(-20,0.3);
+        imudrive(-15,0.3);
         /*drive to cryptobox */
         drivetime(1.0,1.0,1.0,1.0,1500);
         imudrive(90,0.5);
