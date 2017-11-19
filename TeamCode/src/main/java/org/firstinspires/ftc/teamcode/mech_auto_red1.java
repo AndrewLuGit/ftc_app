@@ -39,9 +39,9 @@ public class mech_auto_red1 extends LinearOpMode {
     private Orientation angles;
     private OpenGLMatrix lastLocation = null;
     private VuforiaLocalizer vuforia;
-    private boolean myTeamRed = true;
-    private int myBSPosition = 1; /* 1: top lfts 2: top right 3: bottom lfts 4:bootom right */
-    private int myPitLocation = 0;    /* 1 : lfts 0: center -1 : right */
+    private boolean myTeamRed = false;
+    private int myBSPosition = 4; /* 1: top lfts 2: top right 3: bottom lfts 4:bootom right */
+    private int myPictoLocation = 0;    /* 1 : lfts 0: center -1 : right */
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -63,19 +63,16 @@ public class mech_auto_red1 extends LinearOpMode {
         parameters.loggingTag          = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
         imu = hardwareMap.get(BNO055IMU.class,"imu");
-        imu.initialize(parameters);
         VuforiaLocalizer.Parameters paramters2 = new VuforiaLocalizer.Parameters();
         paramters2.vuforiaLicenseKey = "AVpbLJb/////AAAAGXZuk17KREdul0PqldXjI4ETC+yUOY/0Kn2QZcusavTR02WKxGvyI4E5oodS5Jta30WYJtnJuH7AhLaMe8grr9UC2U3qlnQkypIAZsR8xa38f669mVIo9wujvkZpHzvscPZGdZ2NaheUepxU/asMbuldnDOo3TjSYiiEbk1N3OkxdTeMa4W+BOyrO6sD8L7bcPfnFpmuOPRv0+NeEUL638AjNyi+GQeHYaSLsu6u4ONKtwF+axjjg0W+LRgp5T/5oWxexW3fgoMrkijzsJ0I5OuxSdCeZ3myJthxcyHwHqdhuxmWFvFOoYgJ4k6LdGNijymNWqMp97utjg8YXMAguMLJU2QkPJvZQqbkzIdjzzQk";
         paramters2.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
         this.vuforia = ClassFactory.createVuforiaLocalizer(paramters2);
-        VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
-        VuforiaTrackable relicTemplate = relicTrackables.get(0);
+        imu.initialize(parameters);
         jewelHitter.setPosition(0.05);
         telemetry.addLine("Init Ready");
         telemetry.update();
         /* start of the code */
         waitForStart();
-        relicTrackables.activate();
         imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         // Clear telemetry
@@ -92,11 +89,11 @@ public class mech_auto_red1 extends LinearOpMode {
             telemetry.addData("Servo Position",jewelHitter.getPosition());
             telemetry.update();
         }
-
-
+        sleep(500);
         kickOpponentJewel(myTeamRed);
         /* get my pit location by scan the Vulmark */
         /* get to the right postion before unload Glyphs */
+        updateMyPitLocation();
         scorePositioning();
         /* unloading */
         scoreGlyphs();
@@ -107,23 +104,22 @@ public class mech_auto_red1 extends LinearOpMode {
         double initDegrees = angles.firstAngle;
         double pwr = 0;
         double currDegrees = angles.firstAngle;
-        double tarDegrees = initDegrees + turnDegrees;
-        while (Math.abs(tarDegrees-currDegrees)>5){
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currDegrees = angles.firstAngle;
-            if (turnDegrees==0) {
-                break;
-            }
-            if (Math.abs(turnDegrees)==turnDegrees){
-                pwr = k1*(tarDegrees-currDegrees)/(tarDegrees-initDegrees);
-                if (pwr<0.2) {
-                    pwr=0.2;
-                }
-            } else if (Math.abs(turnDegrees)==-turnDegrees) {
-                pwr = -k1*(tarDegrees-currDegrees)/(tarDegrees-initDegrees);
-                if (pwr>-0.2) {
-                    pwr=-0.2;
-                }
+        double tarDegrees;
+        int offset = 0;
+
+        if (initDegrees < -90) {
+            initDegrees = 360 + initDegrees;
+            currDegrees = initDegrees;
+        }
+        tarDegrees = initDegrees + turnDegrees;
+
+        while (Math.abs(tarDegrees-currDegrees)>=5){
+
+            pwr = k1*(tarDegrees-currDegrees)/Math.abs(tarDegrees-initDegrees);
+            if (pwr>0 && pwr<0.2) {
+                pwr=0.2;
+            } else if (pwr<0&&pwr>-0.2) {
+                pwr = -0.2;
             }
             drivelf.setPower(-pwr);
             driverf.setPower(pwr);
@@ -133,6 +129,11 @@ public class mech_auto_red1 extends LinearOpMode {
             telemetry.addData("Power",pwr);
             telemetry.addData("Degrees",currDegrees);
             telemetry.update();
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            currDegrees = angles.firstAngle;
+            if (currDegrees < -90 ) {
+                currDegrees = 360 + currDegrees;
+            }
         }
         drivelf.setPower(0.0);
         driverf.setPower(0.0);
@@ -156,14 +157,14 @@ public class mech_auto_red1 extends LinearOpMode {
     {
         if (isLeft) {
             telemetry.addLine("kick left");
-            imudrive(-15,0.3);
-            sleep(500);
             imudrive(15,0.3);
+            sleep(500);
+            imudrive(-15,0.3);
         } else {
             telemetry.addLine("kick right");
-            imudrive(15,0.3);
-            sleep(500);
             imudrive(-15,0.3);
+            sleep(500);
+            imudrive(15,0.3);
         }
     }
 
@@ -179,9 +180,6 @@ public class mech_auto_red1 extends LinearOpMode {
 
     private void kickOpponentJewel(boolean teamRed) {
          /* Detect the color */
-        jewelHitter.setPosition(0.05);
-        /* ? really need sleep */
-        sleep(500);
         if (teamRed) {
             telemetry.addLine("Team red");
             /* kick blue */
@@ -198,6 +196,7 @@ public class mech_auto_red1 extends LinearOpMode {
                 kickLeft(true);
             }
         }
+        jewelHitter.setPosition(0.05);
         telemetry.update();
     }
 
@@ -208,13 +207,21 @@ public class mech_auto_red1 extends LinearOpMode {
         relicTrackables.activate();
         RelicRecoveryVuMark vuMark= RelicRecoveryVuMark.UNKNOWN;
         RelicRecoveryVuMark vuMark1;
+        int offset = 0;
         imudrive(20,0.3);
         telemetry.addLine("Scanning");
         telemetry.update();
 
         while (vuMark == RelicRecoveryVuMark.UNKNOWN) {
             /* may need sleep */
+            sleep(200);
+            imudrive(-5,0.3);
+            offset = offset - 5;
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
+            if (offset < -10 ) {
+                myPictoLocation = 0;
+                return;
+            }
         }
         vuMark1 =  RelicRecoveryVuMark.from(relicTemplate);
 
@@ -222,16 +229,16 @@ public class mech_auto_red1 extends LinearOpMode {
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
             vuMark1 =  RelicRecoveryVuMark.from(relicTemplate);
         }
-        imudrive(-20,0.3);
+        imudrive((-20 - offset),0.3);
         if (vuMark==RelicRecoveryVuMark.LEFT){
             telemetry.addLine("Left");
-            myPitLocation = 1;
+            myPictoLocation = 1;
         } else if (vuMark==RelicRecoveryVuMark.CENTER){
             telemetry.addLine("Center");
-            myPitLocation = 0;
+            myPictoLocation = 0;
         } else if (vuMark==RelicRecoveryVuMark.RIGHT) {
             telemetry.addLine("Right");
-            myPitLocation = -1;
+            myPictoLocation = -1;
         }
         telemetry.update();
     }
@@ -247,8 +254,8 @@ public class mech_auto_red1 extends LinearOpMode {
             imudrive(90,0.5);
         } else {
             imudrive(90,0.5);
+            drivetime(1.0,1.0,1.0,1.0,1400);
             imudrive(90,0.5);
-            drivetime(-1.0,-1.0,-1.0,-1.0,1500);
         }
         /* bump adjust */
         drivetime(-0.3,-0.3,-0.3,-0.3,2000);
@@ -256,30 +263,37 @@ public class mech_auto_red1 extends LinearOpMode {
 
 
     private void adjustScoreAngel() {
-        if ((myBSPosition == 1) || (myBSPosition == 2) ) {
-            imudrive(-90,0.5);
+        if (myBSPosition == 1 ) {
+            imudrive(-90,0.3);
+        } else if(myBSPosition == 2) {
+            imudrive(45,0.3);
+
+        }  else if(myBSPosition == 3) {
+            imudrive(90,0.3);
         } else {
-            imudrive(90,0.5);
+            imudrive(45,0.3);
         }
     }
 
     private int LocationOffset() {
         int offset = 0;
 
-        if (myPitLocation == 1) {
-            offset = 540;
-        } else if(myPitLocation == -1) {
-            offset = -540;
-        }
-        if(myBSPosition == 2 ) {
-            offset += 1000;
+        if ( myBSPosition == 1 ) {
+            offset = 550;
         } else if ( myBSPosition == 3 ) {
-            offset = 0 - offset;
-        } else if (myBSPosition == 4) {
-            offset = 0 - offset;
-            offset += 1000;
+            offset =- 550 ;
+        }  else if ( myBSPosition == 2 ) {
+            offset = 777 ;
+        } else {
+            offset = -777 ;
         }
 
+        if (myPictoLocation == -1 ) {
+            offset =  0 - offset;
+        } else if(myPictoLocation == 0) {
+            offset = 0;
+        }
+        telemetry.addData("LocationOffset", offset);
         return offset;
 
     }
@@ -287,17 +301,32 @@ public class mech_auto_red1 extends LinearOpMode {
     private void scorePositioning() {
 
          /*drive to cryptobox */
-        int offset;
+        int offset = 0;
+        double off_d;
 
         getOffAdjust();
 
-        offset = LocationOffset();
-        drivetime(0.5, 0.5, 0.5, 0.5, (1890 + offset));
-        adjustScoreAngel();
+        if (myBSPosition == 1 || myBSPosition == 3) {
+            offset = LocationOffset();
+            drivetime(0.5, 0.5, 0.5, 0.5, (1890 + offset));
+            adjustScoreAngel();
+        }
+        if (myBSPosition == 2 || myBSPosition == 4) {
+            drivetime(0.5, 0.5, 0.5, 0.5, 2200);
+            adjustScoreAngel();
+            offset = LocationOffset();
+            drivetime(0.5, 0.5, 0.5, 0.5, (2290 + offset));
+            adjustScoreAngel();
+            off_d = offset;
+            off_d = 770 - off_d / 1.414;
+            offset = (int) Math.round(off_d);
+            drivetime(0.5, 0.5, 0.5, 0.5, offset);
+        }
+
     }
     private void scoreGlyphs() {
 
-        drivetime(0.5,0.5,0.5,0.5,700);
+        drivetime(0.5,0.5,0.5,0.5,1000);
         grabber.setPower(1.0);
         sleep(2000);
         grabber.setPower(-0.01);
