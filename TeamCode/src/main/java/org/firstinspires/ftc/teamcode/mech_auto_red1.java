@@ -178,8 +178,6 @@ public class mech_auto_red1 extends LinearOpMode {
             telemetry.addData("Degrees_offset", degree_offset);
             telemetry.addData("Power",pwr);
             telemetry.update();
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currDegrees = revert_normalize(initDegrees, angles.firstAngle);
         }
     }
 
