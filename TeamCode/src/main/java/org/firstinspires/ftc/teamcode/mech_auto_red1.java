@@ -65,6 +65,7 @@ public class mech_auto_red1 extends LinearOpMode {
         parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
         parameters.loggingEnabled      = true;
         parameters.loggingTag          = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new FineAccelerationIntegrator();
         imu = hardwareMap.get(BNO055IMU.class,"imu");
         imu.initialize(parameters);
         imu.startAccelerationIntegration(new Position(), new Velocity(), 20);
