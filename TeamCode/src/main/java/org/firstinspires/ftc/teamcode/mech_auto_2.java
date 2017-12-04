@@ -26,8 +26,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 /**
  * Autonomous for Relic Recovery
  */
-@Disabled
-@Autonomous(name="Blue 2",group="mechanum")
+@Autonomous(name="MechAuto2",group="mechanum")
 public class mech_auto_2 extends LinearOpMode {
     private DcMotor drivelf;
     private DcMotor driverf;

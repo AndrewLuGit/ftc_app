@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.hardware.bosch.NaiveAccelerationIntegrator;
 import com.qualcomm.hardware.lynx.LynxI2cColorRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -22,6 +23,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
+
+
 /**
  * Autonomous for Relic Recovery
  */
@@ -39,10 +42,9 @@ public class mech_auto_red1 extends LinearOpMode {
     private Orientation angles;
     private OpenGLMatrix lastLocation = null;
     private VuforiaLocalizer vuforia;
-    private boolean myTeamRed = false;
+    private boolean myTeamRed = true;
     private int myBSPosition = 4; /* 1: top lfts 2: top right 3: bottom lfts 4:bootom right */
-    private int myPictoLocation = 0;    /* 1 : lfts 0: center -1 : right */
-
+    private int myPitLocation = 0;    /* 1 : lfts 0: center -1 : right */
     @Override
     public void runOpMode() throws InterruptedException {
         drivelf = hardwareMap.dcMotor.get("drivelf");
@@ -51,39 +53,53 @@ public class mech_auto_red1 extends LinearOpMode {
         driverb = hardwareMap.dcMotor.get("driverb");
         driverf.setDirection(DcMotor.Direction.REVERSE);
         driverb.setDirection(DcMotor.Direction.REVERSE);
+        /*
         grabber = hardwareMap.crservo.get("grabber");
         grabberMotor = hardwareMap.dcMotor.get("grabberMotor");
         jewelHitter = hardwareMap.servo.get("jewelHitter");
         colorRange = (LynxI2cColorRangeSensor) hardwareMap.get("color");
+        */
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
         parameters.loggingEnabled      = true;
         parameters.loggingTag          = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
         imu = hardwareMap.get(BNO055IMU.class,"imu");
+        imu.initialize(parameters);
+        /*
         VuforiaLocalizer.Parameters paramters2 = new VuforiaLocalizer.Parameters();
         paramters2.vuforiaLicenseKey = "AVpbLJb/////AAAAGXZuk17KREdul0PqldXjI4ETC+yUOY/0Kn2QZcusavTR02WKxGvyI4E5oodS5Jta30WYJtnJuH7AhLaMe8grr9UC2U3qlnQkypIAZsR8xa38f669mVIo9wujvkZpHzvscPZGdZ2NaheUepxU/asMbuldnDOo3TjSYiiEbk1N3OkxdTeMa4W+BOyrO6sD8L7bcPfnFpmuOPRv0+NeEUL638AjNyi+GQeHYaSLsu6u4ONKtwF+axjjg0W+LRgp5T/5oWxexW3fgoMrkijzsJ0I5OuxSdCeZ3myJthxcyHwHqdhuxmWFvFOoYgJ4k6LdGNijymNWqMp97utjg8YXMAguMLJU2QkPJvZQqbkzIdjzzQk";
         paramters2.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
         this.vuforia = ClassFactory.createVuforiaLocalizer(paramters2);
-        imu.initialize(parameters);
+        VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        VuforiaTrackable relicTemplate = relicTrackables.get(0);
+        */
+        /*
         jewelHitter.setPosition(0.05);
+        */
         telemetry.addLine("Init Ready");
         telemetry.update();
         /* start of the code */
         waitForStart();
-        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        /*
+        relicTrackables.activate();
+        */
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 20);
+
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         // Clear telemetry
+
         telemetry.clear();
+        /*
         grabber.setPower(-0.1);
         grabberMotor.setPower(-0.5);
         sleep(500);
         grabberMotor.setPower(0);
+        */
         /* lower jewel hitter, wait until in position */
-        jewelHitter.setPosition(0.55);
-
+        // jewelHitter.setPosition(0.55);
+/*
         while (jewelHitter.getPosition()!=0.55) {
             sleep(500);
             telemetry.addData("Servo Position",jewelHitter.getPosition());
@@ -91,43 +107,53 @@ public class mech_auto_red1 extends LinearOpMode {
         }
         sleep(500);
         kickOpponentJewel(myTeamRed);
+ */
+        test_imudrive();
         /* get my pit location by scan the Vulmark */
         /* get to the right postion before unload Glyphs */
-        updateMyPitLocation();
-        scorePositioning();
+     //   scorePositioning();
         /* unloading */
-        scoreGlyphs();
+   //     scoreGlyphs();
         imu.stopAccelerationIntegration();
     }
+
     private void imudrive(double turnDegrees,double k1){
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double initDegrees = angles.firstAngle;
         double pwr = 0;
         double currDegrees = angles.firstAngle;
-        double tarDegrees;
-        int offset = 0;
+        double tarDegrees = initDegrees + turnDegrees;
+        double degree_offset;
+        double drive_time = 0;
 
-        if (initDegrees < -90) {
-            initDegrees = 360 + initDegrees;
-            currDegrees = initDegrees;
-        }
-        tarDegrees = initDegrees + turnDegrees;
+        degree_offset = tarDegrees - currDegrees;
 
-        while (Math.abs(tarDegrees-currDegrees)>=5){
-
-            pwr = k1*(tarDegrees-currDegrees)/Math.abs(tarDegrees-initDegrees);
-            if (pwr>0 && pwr<0.2) {
-                pwr=0.2;
-            } else if (pwr<0&&pwr>-0.2) {
-                pwr = -0.2;
+        while (Math.abs(degree_offset) > 0.2){
+            if (degree_offset > 0) {
+                pwr = 0.25;
+            } else if (degree_offset < 0) {
+                pwr = -0.25;
+            } else {
+                break;
             }
+            drive_time = Math.abs(degree_offset) * k1;
+            telemetry.addData("drive time", drive_time);
             drivelf.setPower(-pwr);
             driverf.setPower(pwr);
             drivelb.setPower(-pwr);
             driverb.setPower(pwr);
-            telemetry.addData("Degrees1",tarDegrees-currDegrees);
+            sleep((int) drive_time);
+            drivelf.setPower(0.0);
+            driverf.setPower(0.0);
+            drivelb.setPower(0.0);
+            driverb.setPower(0.0);
+            sleep(40);
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            currDegrees = angles.firstAngle;
+            degree_offset = tarDegrees - currDegrees;
+            telemetry.addData("current degree", currDegrees);
+            telemetry.addData("Degrees_offset", degree_offset);
             telemetry.addData("Power",pwr);
-            telemetry.addData("Degrees",currDegrees);
             telemetry.update();
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             currDegrees = angles.firstAngle;
@@ -135,12 +161,8 @@ public class mech_auto_red1 extends LinearOpMode {
                 currDegrees = 360 + currDegrees;
             }
         }
-        drivelf.setPower(0.0);
-        driverf.setPower(0.0);
-        drivelb.setPower(0.0);
-        driverb.setPower(0.0);
-        telemetry.clear();
     }
+
     private void drivetime(double lfPower,double rfPower, double lbPower, double rbPower,long milliseconds){
         drivelf.setPower(lfPower);
         driverf.setPower(rfPower);
@@ -151,6 +173,27 @@ public class mech_auto_red1 extends LinearOpMode {
         driverf.setPower(0.0);
         drivelb.setPower(0.0);
         driverb.setPower(0.0);
+    }
+    private void test_imudrive(){
+        int i;
+
+        /* left turn 45 degree */
+
+        for (i=0; i < 9; i++) {
+            imudrive(5, 9.0);
+        }
+
+        drivetime(0.5,0.5,0.5,0.5,300);
+        for (i=0; i < 9; i++) {
+            imudrive(-5, 9.0);
+        }
+
+        /* test 45 dergress */
+        imudrive(45, 9.0);
+        sleep(5000);
+        imudrive(90, 9.0);
+        sleep(5000);
+
     }
 
     private void kickLeft(boolean isLeft)
@@ -324,6 +367,7 @@ public class mech_auto_red1 extends LinearOpMode {
         }
 
     }
+
     private void scoreGlyphs() {
 
         drivetime(0.5,0.5,0.5,0.5,1000);
