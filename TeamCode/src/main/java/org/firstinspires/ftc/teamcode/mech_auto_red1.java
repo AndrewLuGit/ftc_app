@@ -44,7 +44,7 @@ public class mech_auto_red1 extends LinearOpMode {
     private VuforiaLocalizer vuforia;
     private boolean myTeamRed = true;
     private int myBSPosition = 4; /* 1: top lfts 2: top right 3: bottom lfts 4:bootom right */
-    private int myPitLocation = 0;    /* 1 : lfts 0: center -1 : right */
+    private int myPictoLocation = 0;    /* 1 : lfts 0: center -1 : right */
     @Override
     public void runOpMode() throws InterruptedException {
         drivelf = hardwareMap.dcMotor.get("drivelf");
@@ -67,6 +67,8 @@ public class mech_auto_red1 extends LinearOpMode {
         parameters.loggingTag          = "IMU";
         imu = hardwareMap.get(BNO055IMU.class,"imu");
         imu.initialize(parameters);
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 20);
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         /*
         VuforiaLocalizer.Parameters paramters2 = new VuforiaLocalizer.Parameters();
         paramters2.vuforiaLicenseKey = "AVpbLJb/////AAAAGXZuk17KREdul0PqldXjI4ETC+yUOY/0Kn2QZcusavTR02WKxGvyI4E5oodS5Jta30WYJtnJuH7AhLaMe8grr9UC2U3qlnQkypIAZsR8xa38f669mVIo9wujvkZpHzvscPZGdZ2NaheUepxU/asMbuldnDOo3TjSYiiEbk1N3OkxdTeMa4W+BOyrO6sD8L7bcPfnFpmuOPRv0+NeEUL638AjNyi+GQeHYaSLsu6u4ONKtwF+axjjg0W+LRgp5T/5oWxexW3fgoMrkijzsJ0I5OuxSdCeZ3myJthxcyHwHqdhuxmWFvFOoYgJ4k6LdGNijymNWqMp97utjg8YXMAguMLJU2QkPJvZQqbkzIdjzzQk";
@@ -80,17 +82,18 @@ public class mech_auto_red1 extends LinearOpMode {
         */
         telemetry.addLine("Init Ready");
         telemetry.update();
+        sleep(100);
+        telemetry.clear();
         /* start of the code */
         waitForStart();
         /*
         relicTrackables.activate();
         */
-        imu.startAccelerationIntegration(new Position(), new Velocity(), 20);
 
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
         // Clear telemetry
 
-        telemetry.clear();
+
         /*
         grabber.setPower(-0.1);
         grabberMotor.setPower(-0.5);
@@ -102,7 +105,7 @@ public class mech_auto_red1 extends LinearOpMode {
 /*
         while (jewelHitter.getPosition()!=0.55) {
             sleep(500);
-            telemetry.addData("Servo Position",jewelHitter.getPosition());
+            telemetry.addData("Servo Position",j ewelHitter.getPosition());
             telemetry.update();
         }
         sleep(500);
@@ -116,6 +119,26 @@ public class mech_auto_red1 extends LinearOpMode {
    //     scoreGlyphs();
         imu.stopAccelerationIntegration();
     }
+
+    /* The following function is to revert normalize happening in library,  it is not desired
+     * revert here.  here is the normalize function
+     * static double normalizeDegrees(double degrees)
+     * {
+     *  while (degrees >= 180.0) degrees -= 360.0;
+     * while (degrees < -180.0) degrees += 360.0;
+     * return degrees;
+     *  }
+     *
+     */
+    private double revert_normalize(double initDegrees, double currDegrees) {
+        if (initDegrees > 0 && currDegrees < 0  ) {
+            currDegrees += 360;
+        } else if (initDegrees < 0 && currDegrees > 0) {
+            currDegrees -= 360;
+        }
+        return  currDegrees;
+    }
+
 
     private void imudrive(double turnDegrees,double k1){
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
@@ -149,17 +172,14 @@ public class mech_auto_red1 extends LinearOpMode {
             driverb.setPower(0.0);
             sleep(40);
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currDegrees = angles.firstAngle;
+            currDegrees = revert_normalize(initDegrees, angles.firstAngle);
             degree_offset = tarDegrees - currDegrees;
             telemetry.addData("current degree", currDegrees);
             telemetry.addData("Degrees_offset", degree_offset);
             telemetry.addData("Power",pwr);
             telemetry.update();
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currDegrees = angles.firstAngle;
-            if (currDegrees < -90 ) {
-                currDegrees = 360 + currDegrees;
-            }
+            currDegrees = revert_normalize(initDegrees, angles.firstAngle);
         }
     }
 
@@ -178,7 +198,7 @@ public class mech_auto_red1 extends LinearOpMode {
         int i;
 
         /* left turn 45 degree */
-
+/*
         for (i=0; i < 9; i++) {
             imudrive(5, 9.0);
         }
@@ -187,12 +207,19 @@ public class mech_auto_red1 extends LinearOpMode {
         for (i=0; i < 9; i++) {
             imudrive(-5, 9.0);
         }
-
+*/
         /* test 45 dergress */
         imudrive(45, 9.0);
-        sleep(5000);
+        sleep(1000);
         imudrive(90, 9.0);
-        sleep(5000);
+        sleep(2000);
+        imudrive(43, 9.0);
+        sleep(2000);
+        imudrive(60, 9.0);
+        sleep(1000);
+        imudrive(-120, 9.0);
+        sleep(1000);
+        imudrive(-100, 9.0);
 
     }
 
