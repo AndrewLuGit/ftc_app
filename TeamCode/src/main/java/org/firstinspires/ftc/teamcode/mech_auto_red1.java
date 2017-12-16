@@ -16,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
@@ -63,7 +64,7 @@ public class mech_auto_red1 extends LinearOpMode {
    public void initialize () {
        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
        VuforiaLocalizer.Parameters paramters2 = new VuforiaLocalizer.Parameters();
-
+       telemetry.addLine("Init dcMotor");
        telemetry.addLine("get dirve");
        drivelf = hardwareMap.dcMotor.get("drivelf");
        driverf = hardwareMap.dcMotor.get("driverf");
@@ -71,6 +72,14 @@ public class mech_auto_red1 extends LinearOpMode {
        driverb = hardwareMap.dcMotor.get("driverb");
        driverf.setDirection(DcMotor.Direction.REVERSE);
        driverb.setDirection(DcMotor.Direction.REVERSE);
+       telemetry.addLine("reset encode");
+
+       drivelf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+       driverf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+       drivelb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+       driverb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+       telemetry.addLine("Init IMU");
        myIntegrator = new FineAccelerationIntegrator();
        parameters = new BNO055IMU.Parameters();
        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
@@ -82,34 +91,24 @@ public class mech_auto_red1 extends LinearOpMode {
        imu = hardwareMap.get(BNO055IMU.class,"imu");
        imu.initialize(parameters);
 
-       telemetry.addLine("Init IMU");
+       telemetry.addLine("Init grabberMotor");
         /*
         grabber = hardwareMap.crservo.get("grabber");
         grabberMotor = hardwareMap.dcMotor.get("grabberMotor");
         jewelHitter = hardwareMap.servo.get("jewelHitter");
         colorRange = (LynxI2cColorRangeSensor) hardwareMap.get("color");
-        */
+       telemetry.addLine("Init Vuforia");
         paramters2.vuforiaLicenseKey = "AVpbLJb/////AAAAGXZuk17KREdul0PqldXjI4ETC+yUOY/0Kn2QZcusavTR02WKxGvyI4E5oodS5Jta30WYJtnJuH7AhLaMe8grr9UC2U3qlnQkypIAZsR8xa38f669mVIo9wujvkZpHzvscPZGdZ2NaheUepxU/asMbuldnDOo3TjSYiiEbk1N3OkxdTeMa4W+BOyrO6sD8L7bcPfnFpmuOPRv0+NeEUL638AjNyi+GQeHYaSLsu6u4ONKtwF+axjjg0W+LRgp5T/5oWxexW3fgoMrkijzsJ0I5OuxSdCeZ3myJthxcyHwHqdhuxmWFvFOoYgJ4k6LdGNijymNWqMp97utjg8YXMAguMLJU2QkPJvZQqbkzIdjzzQk";
         paramters2.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
         vuforia = ClassFactory.createVuforiaLocalizer(paramters2);
 
        telemetry.addLine("Init Vuforia");
+       */
         /*
         VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
         VuforiaTrackable relicTemplate = relicTrackables.get(0);
         */
-        /*
-       drivelf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-       driverf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-       drivelb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-       driverb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-       */
-       drivelf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-       driverf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-       drivelf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-       driverf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-       telemetry.addLine("reset encode");
        telemetry.addLine("Init Ready");
        telemetry.update();
    }
@@ -148,7 +147,9 @@ public class mech_auto_red1 extends LinearOpMode {
  */
         imu.startAccelerationIntegration(new Position(), new Velocity(), 20);
         //test_imudrive();
-        test_encode();
+        test_position_sensor();
+        //test_encode();
+        //test_moveto();
         //drivetime(0.6,0.6,-0.6,-0.6,1000);
         /* get my pit location by scan the Vulmark */
         /* get to the right postion before unload Glyphs */
@@ -156,6 +157,9 @@ public class mech_auto_red1 extends LinearOpMode {
         /* unloading */
    //     scoreGlyphs();
         imu.stopAccelerationIntegration();
+        while (opModeIsActive()) {
+            telemetry.update();
+        }
     }
 
 
@@ -206,7 +210,7 @@ public class mech_auto_red1 extends LinearOpMode {
         // However, if you require that BOTH motors have finished their moves before the robot continues
         // onto the next step, use (isBusy() || isBusy()) in the loop test.
 
-        while ((runtime.seconds() < timeoutS) &&
+        while (opModeIsActive()&& (runtime.seconds() < timeoutS) &&
                 (drivelf.isBusy() && driverf.isBusy())) {
 
             // Display it for the driver.
@@ -223,15 +227,21 @@ public class mech_auto_red1 extends LinearOpMode {
         drivelb.setPower(0);
         driverb.setPower(0);
             // Turn off RUN_TO_POSITION
+        /*
         drivelf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         driverf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         drivelb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         driverb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        */
+        drivelf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        driverf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        drivelf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        driverf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     private void test_encode() {
         encoderDrive(DRIVE_SPEED,  24,  24, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
-       // encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+        encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
        // encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
     }
 
@@ -261,38 +271,23 @@ public class mech_auto_red1 extends LinearOpMode {
         double currDegrees = angles.firstAngle;
         double tarDegrees = initDegrees + turnDegrees;
         double degree_offset;
-        double drive_time = 0;
+        double drive_distance = 0;
 
         degree_offset = tarDegrees - currDegrees;
+        while (opModeIsActive() && (Math.abs(degree_offset) > 0.3) ){
+            drive_distance  = (degree_offset * k1);
 
-        while (Math.abs(degree_offset) > 0.2){
-            if (degree_offset > 0) {
-                pwr = 0.25;
-            } else if (degree_offset < 0) {
-                pwr = -0.25;
-            } else {
-                break;
-            }
-            drive_time = Math.abs(degree_offset) * k1;
-            telemetry.addData("drive time", drive_time);
-            drivelf.setPower(-pwr);
-            driverf.setPower(pwr);
-            drivelb.setPower(-pwr);
-            driverb.setPower(pwr);
-            sleep((int) drive_time);
-            drivelf.setPower(0.0);
-            driverf.setPower(0.0);
-            drivelb.setPower(0.0);
-            driverb.setPower(0.0);
-            sleep(40);
+            telemetry.addData("drive distance", drive_distance);
+            encoderDrive(TURN_SPEED, -drive_distance , drive_distance, 5.0);  // S2: Turn Right 12 Inches with 5Sec timeout
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             currDegrees = revert_normalize(initDegrees, angles.firstAngle);
             degree_offset = tarDegrees - currDegrees;
             telemetry.addData("current degree", currDegrees);
             telemetry.addData("Degrees_offset", degree_offset);
-            telemetry.addData("Power",pwr);
             telemetry.update();
+            //sleep(2000);
         }
+
     }
 
     private void drivetime(double lfPower,double rfPower, double lbPower, double rbPower,long milliseconds){
@@ -325,39 +320,84 @@ public class mech_auto_red1 extends LinearOpMode {
         }
 */
         /* test 45 dergress */
-        imudrive(45, 9.0);
+        imudrive(45, 0.17);
         sleep(1000);
-        imudrive(90, 9.0);
+        imudrive(90, 0.17);
         sleep(2000);
-        imudrive(43, 9.0);
+        imudrive(45, 0.17);
         sleep(2000);
-        imudrive(60, 9.0);
+        imudrive(60, 0.17);
         sleep(1000);
-        imudrive(-120, 9.0);
+        imudrive(-120, 0.17);
         sleep(1000);
-        imudrive(-100, 9.0);
-
+        imudrive(-100, 0.17);
     }
+
+
 
     private void moveto(Position destination) {
         Position current = imu.getPosition();
         double x_offset = destination.x - current.x;
         double y_offset = destination.y - current.y;
-        double turn_degree = Math.atan2(y_offset, x_offset);
-        double distance =   Math.sqrt(x_offset * x_offset + y_offset * y_offset);
-        long drive_time = (long) distance / 100;
+        double turn_degree = -Math.atan2(y_offset, x_offset);
+        double distance =   Math.sqrt(x_offset * x_offset + y_offset * y_offset) / 25.4;
 
-        while (drive_time > 1) {
-            imudrive(turn_degree, 9.0);
-            drivetime(1.0, 1.0, 1.0, 1.0, drive_time);
-            current = imu.getPosition();
-            x_offset = destination.x - current.x;
-            y_offset = destination.y - current.y;
-            turn_degree = Math.atan2(y_offset, x_offset);
-            distance = Math.sqrt(x_offset * x_offset + y_offset * y_offset);
-            drive_time = (long) distance / 100;
+        telemetry.addData("current position",  "%s", current.toString());
+        telemetry.addData("x_offset", x_offset);
+        telemetry.addData("y_offset", y_offset);
+        telemetry.addData("turn degree", turn_degree);
+        telemetry.addData("distance", distance);
+        telemetry.update();
+        //imudrive(-turn_degree, 0.17);
+        if (x_offset < 0) {
+            distance = -distance;
         }
 
+        encoderDrive(DRIVE_SPEED,  distance, distance , 5.0);
+        sleep(2000);
+
+
+        while (distance > 0.3) {
+          //  imudrive(turn_degree, 0.17);
+            if (x_offset <0) {
+                distance = -distance;
+            }
+            encoderDrive(DRIVE_SPEED,  distance, distance , 10.0);
+            current = imu.getPosition();
+            telemetry.addData("current position",  "%s", current.toString());
+            x_offset = (destination.x - current.x);
+            y_offset = (destination.y - current.y);
+            turn_degree = - Math.atan2(y_offset, x_offset);
+            distance = Math.sqrt(x_offset * x_offset + y_offset * y_offset) / 25.4;
+            telemetry.addData("x_offset", x_offset);
+            telemetry.addData("y_offset", y_offset);
+            telemetry.addData("turn degree", turn_degree);
+            telemetry.update();
+        }
+    }
+
+    private void test_moveto() {
+        Position destination = new Position();
+        destination.x += 800;
+        destination.y += 800;
+        destination.unit = DistanceUnit.MM;
+        moveto(destination);
+    }
+    private void test_position_sensor() {
+        Position current = imu.getPosition();
+        telemetry.addData("current position",  "%s", current.toString());
+        encoderDrive(DRIVE_SPEED,  24,  24, 5.0);
+        //imudrive(90, 0.10);
+        //encoderDrive(DRIVE_SPEED,  24,  24, 5.0);
+        Position destination = imu.getPosition();
+        telemetry.addData("new position",  "%s", destination.toString());
+        double x_offset = destination.x - current.x;
+        double y_offset = destination.y - current.y;
+        telemetry.addData("x_offset", x_offset);
+        telemetry.addData("y_offset", y_offset);
+        telemetry.update();
+        sleep(10000);
+        moveto(current);
     }
 
     private void kickLeft(boolean isLeft)
