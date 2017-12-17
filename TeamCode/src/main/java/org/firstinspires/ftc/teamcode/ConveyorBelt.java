@@ -12,15 +12,18 @@ public class ConveyorBelt extends LinearOpMode {
 
     private DcMotor intakeLeft;
     private DcMotor intakeRight;
-
+    /*
     public ConveyorBelt() {
         intakeLeft = hardwareMap.dcMotor.get("intakeLeft");
         intakeRight = hardwareMap.dcMotor.get("intakeRight");
         intakeLeft.setDirection(DcMotor.Direction.REVERSE);
     }
-
+*/
     @Override
     public void runOpMode() throws InterruptedException {
+        intakeLeft = hardwareMap.dcMotor.get("intakeLeft");
+        intakeRight = hardwareMap.dcMotor.get("intakeRight");
+        intakeLeft.setDirection(DcMotor.Direction.REVERSE);
         waitForStart();
         while (opModeIsActive()) {
             if (gamepad1.left_bumper) {

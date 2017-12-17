@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.bosch.NaiveAccelerationIntegrator;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -17,6 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 /**
  * Teleop for Mechanum Drive and Relic Recovery
  */
+@Disabled
 @TeleOp(name="Mechanum Teleop 2",group="mechanum")
 public class mech_teleop2 extends LinearOpMode {
     /*Declares drive motors: lf = left front,lb = left back,etc.*/
@@ -49,19 +51,19 @@ public class mech_teleop2 extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()){
             //Math wizardry
-        double r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
-        double robotAngle = Math.atan2(gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
-        double rightX = gamepad1.right_stick_x;
-        final double v1 = r * Math.cos(robotAngle) + rightX;
-        final double v2 = r * Math.sin(robotAngle) - rightX;
-        final double v3 = r * Math.sin(robotAngle) + rightX;
-        final double v4 = r * Math.cos(robotAngle) - rightX;
-        drivelf.setPower(k*v2);
-        driverf.setPower(k*v1);
-        drivelb.setPower(k*v4);
-        driverb.setPower(k*v3);
+            double r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
+            double robotAngle = Math.atan2(gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
+            double rightX = gamepad1.right_stick_x;
+            final double v1 = r * Math.cos(robotAngle) + rightX;
+            final double v2 = r * Math.sin(robotAngle) - rightX;
+            final double v3 = r * Math.sin(robotAngle) + rightX;
+            final double v4 = r * Math.cos(robotAngle) - rightX;
+            drivelf.setPower(k*v2);
+            driverf.setPower(k*v1);
+            drivelb.setPower(k*v4);
+            driverb.setPower(k*v3);
             if(gamepad1.left_bumper || gamepad2.left_bumper){
-                    grabber.setPower(1.0);
+                grabber.setPower(1.0);
             } else if(gamepad1.left_trigger>=0.5 || gamepad2.left_trigger>=0.5){
                 grabber.setPower(-1.0);
             } else{

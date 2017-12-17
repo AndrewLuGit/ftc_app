@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 /**
  * Teleop for Mechanum Drive and Relic Recovery
  */
+@Disabled
 @TeleOp(name="Mechanum Teleop",group="mechanum")
 public class mech_teleop extends OpMode {
     /*Declares drive motors: lf = left front,lb = left back,etc.*/
