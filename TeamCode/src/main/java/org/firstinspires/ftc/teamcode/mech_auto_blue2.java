@@ -31,10 +31,8 @@ public class mech_auto_blue2 extends LinearOpMode {
     private DcMotor driverf;
     private DcMotor drivelb;
     private DcMotor driverb;
-    private CRServo grabber;
     private Servo jewelHitter;
     private LynxI2cColorRangeSensor colorRange;
-    private DcMotor grabberMotor;
     private BNO055IMU imu;
     private Orientation angles;
     private OpenGLMatrix lastLocation = null;
@@ -42,17 +40,18 @@ public class mech_auto_blue2 extends LinearOpMode {
     private boolean myTeamRed = false;
     private int myBSPosition = 4; /* 1: top lfts 2: top right 3: bottom lfts 4:bootom right */
     private int myPictoLocation = 0;    /* 1 : lfts 0: center -1 : right */
-
     @Override
     public void runOpMode() throws InterruptedException {
         drivelf = hardwareMap.dcMotor.get("drivelf");
         driverf = hardwareMap.dcMotor.get("driverf");
         drivelb = hardwareMap.dcMotor.get("drivelb");
         driverb = hardwareMap.dcMotor.get("driverb");
-        driverf.setDirection(DcMotor.Direction.REVERSE);
+        drivelf.setDirection(DcMotor.Direction.REVERSE);
         driverb.setDirection(DcMotor.Direction.REVERSE);
-        grabber = hardwareMap.crservo.get("grabber");
-        grabberMotor = hardwareMap.dcMotor.get("grabberMotor");
+        drivelf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        drivelb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        driverf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        driverb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         jewelHitter = hardwareMap.servo.get("jewelHitter");
         colorRange = (LynxI2cColorRangeSensor) hardwareMap.get("color");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -76,10 +75,6 @@ public class mech_auto_blue2 extends LinearOpMode {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         // Clear telemetry
         telemetry.clear();
-        grabber.setPower(-0.1);
-        grabberMotor.setPower(-0.5);
-        sleep(500);
-        grabberMotor.setPower(0);
         /* lower jewel hitter, wait until in position */
         jewelHitter.setPosition(0.55);
 
@@ -92,10 +87,10 @@ public class mech_auto_blue2 extends LinearOpMode {
         kickOpponentJewel(myTeamRed);
         /* get my pit location by scan the Vulmark */
         /* get to the right postion before unload Glyphs */
-        updateMyPitLocation();
-        scorePositioning();
+        //updateMyPitLocation();
+        //scorePositioning();
         /* unloading */
-        scoreGlyphs();
+        //scoreGlyphs();
         imu.stopAccelerationIntegration();
     }
     private void imudrive(double turnDegrees,double k1){
@@ -112,12 +107,11 @@ public class mech_auto_blue2 extends LinearOpMode {
         }
         tarDegrees = initDegrees + turnDegrees;
 
-        while (Math.abs(tarDegrees-currDegrees)>=5){
+        while (Math.abs(tarDegrees-currDegrees)>=3){
 
-            pwr = k1*(tarDegrees-currDegrees)/Math.abs(tarDegrees-initDegrees);
-            if (pwr>0 && pwr<0.2) {
-                pwr=0.2;
-            } else if (pwr<0&&pwr>-0.2) {
+            if (tarDegrees > currDegrees) {
+                pwr = 0.2;
+            } else if (tarDegrees < currDegrees) {
                 pwr = -0.2;
             }
             drivelf.setPower(-pwr);
@@ -326,10 +320,7 @@ public class mech_auto_blue2 extends LinearOpMode {
     private void scoreGlyphs() {
 
         drivetime(0.5,0.5,0.5,0.5,1000);
-        grabber.setPower(1.0);
         sleep(2000);
-        grabber.setPower(-0.01);
         drivetime(-0.5,-0.5,-0.5,-0.5,300);
-
     }
 }
