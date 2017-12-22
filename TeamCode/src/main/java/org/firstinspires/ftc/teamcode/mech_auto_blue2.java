@@ -93,7 +93,7 @@ public class mech_auto_blue2 extends LinearOpMode {
         //scoreGlyphs();
         imu.stopAccelerationIntegration();
     }
-    private void imudrive(double turnDegrees,double k1){
+    private void imudrive(double turnDegrees){
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double initDegrees = angles.firstAngle;
         double pwr = 0;
@@ -101,10 +101,6 @@ public class mech_auto_blue2 extends LinearOpMode {
         double tarDegrees;
         int offset = 0;
 
-        if (initDegrees < -90) {
-            initDegrees = 360 + initDegrees;
-            currDegrees = initDegrees;
-        }
         tarDegrees = initDegrees + turnDegrees;
 
         while (Math.abs(tarDegrees-currDegrees)>=3){
@@ -124,9 +120,6 @@ public class mech_auto_blue2 extends LinearOpMode {
             telemetry.update();
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             currDegrees = angles.firstAngle;
-            if (currDegrees < -90 ) {
-                currDegrees = 360 + currDegrees;
-            }
         }
         drivelf.setPower(0.0);
         driverf.setPower(0.0);
@@ -150,14 +143,14 @@ public class mech_auto_blue2 extends LinearOpMode {
     {
         if (isLeft) {
             telemetry.addLine("kick left");
-            imudrive(15,0.3);
+            imudrive(15);
             sleep(500);
-            imudrive(-15,0.3);
+            imudrive(-15);
         } else {
             telemetry.addLine("kick right");
-            imudrive(-15,0.3);
+            imudrive(-15);
             sleep(500);
-            imudrive(15,0.3);
+            imudrive(15);
         }
     }
 
@@ -201,14 +194,14 @@ public class mech_auto_blue2 extends LinearOpMode {
         RelicRecoveryVuMark vuMark= RelicRecoveryVuMark.UNKNOWN;
         RelicRecoveryVuMark vuMark1;
         int offset = 0;
-        imudrive(20,0.3);
+        imudrive(20);
         telemetry.addLine("Scanning");
         telemetry.update();
 
         while (vuMark == RelicRecoveryVuMark.UNKNOWN) {
             /* may need sleep */
             sleep(200);
-            imudrive(-5,0.3);
+            imudrive(-5);
             offset = offset - 5;
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
             if (offset < -10 ) {
@@ -222,7 +215,7 @@ public class mech_auto_blue2 extends LinearOpMode {
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
             vuMark1 =  RelicRecoveryVuMark.from(relicTemplate);
         }
-        imudrive((-20 - offset),0.3);
+        imudrive(-20 - offset);
         if (vuMark==RelicRecoveryVuMark.LEFT){
             telemetry.addLine("Left");
             myPictoLocation = 1;
@@ -239,16 +232,16 @@ public class mech_auto_blue2 extends LinearOpMode {
     private void getOffAdjust() {
         if (myBSPosition == 1) {
             drivetime(1.0,1.0,1.0,1.0,1500);
-            imudrive(90,0.5);
+            imudrive(90);
         } else if (myBSPosition == 2) {
             drivetime(-1.0,-1.0,-1.0,-1.0,1500);
         } else if (myBSPosition == 3) {
             drivetime(-1.0,-1.0,-1.0,-1.0,1500);
-            imudrive(90,0.5);
+            imudrive(90);
         } else {
-            imudrive(90,0.5);
+            imudrive(90);
             drivetime(1.0,1.0,1.0,1.0,1400);
-            imudrive(90,0.5);
+            imudrive(90);
         }
         /* bump adjust */
         drivetime(-0.3,-0.3,-0.3,-0.3,2500);
@@ -257,14 +250,14 @@ public class mech_auto_blue2 extends LinearOpMode {
 
     private void adjustScoreAngle() {
         if (myBSPosition == 1 ) {
-            imudrive(-90,0.3);
+            imudrive(-90);
         } else if(myBSPosition == 2) {
-            imudrive(45,0.3);
+            imudrive(45);
 
         }  else if(myBSPosition == 3) {
-            imudrive(90,0.3);
+            imudrive(90);
         } else {
-            imudrive(45,0.3);
+            imudrive(45);
         }
     }
 
