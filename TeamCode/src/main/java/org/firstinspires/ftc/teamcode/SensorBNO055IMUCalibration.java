@@ -31,6 +31,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -98,7 +99,7 @@ import java.util.Locale;
  * @see <a href="https://www.bosch-sensortec.com/bst/products/all_products/bno055">BNO055 product page</a>
  * @see <a href="https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST_BNO055_DS000_14.pdf">BNO055 specification</a>
  */
-@TeleOp(name = "Sensor: BNO055 IMU Calibration", group = "Sensor")
+@TeleOp(name = "IMU Calibration", group = "mechanum")
 // @Disabled                            // Uncomment this to add to the opmode list
 public class SensorBNO055IMUCalibration extends LinearOpMode
     {
@@ -111,30 +112,36 @@ public class SensorBNO055IMUCalibration extends LinearOpMode
 
     // State used for updating telemetry
     Orientation angles;
+    BNO055IMU.AccelerationIntegrator myIntegrator;
 
     //----------------------------------------------------------------------------------------------
     // Main logic
     //----------------------------------------------------------------------------------------------
+    public void initialize () {
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        telemetry.addLine("Init IMU");
+        myIntegrator = new FineAccelerationIntegrator();
+        parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
+        parameters.loggingEnabled      = true;
+        parameters.loggingTag          = "IMU";
+        parameters.accelerationIntegrationAlgorithm = myIntegrator;
+        imu = hardwareMap.get(BNO055IMU.class,"imu");
+        imu.initialize(parameters);
 
+    }
     @Override public void runOpMode() {
 
         telemetry.log().setCapacity(12);
         telemetry.log().add("");
         telemetry.log().add("Please refer to the calibration instructions");
-        telemetry.log().add("contained in the Adafruit IMU calibration");
-        telemetry.log().add("sample opmode.");
         telemetry.log().add("");
-        telemetry.log().add("When sufficient calibration has been reached,");
-        telemetry.log().add("press the 'A' button to write the current");
-        telemetry.log().add("calibration data to a file.");
-        telemetry.log().add("");
+        telemetry.clear();
+        initialize ();
 
-        // We are expecting the IMU to be attached to an I2C port on a Core Device Interface Module and named "imu".
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.loggingEnabled = true;
-        parameters.loggingTag     = "IMU";
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);
+        // We are expecting the IMU to be attached to an I2C port on a Core Device Interface Module and named "imu"
 
         composeTelemetry();
         telemetry.log().add("Waiting for start...");
