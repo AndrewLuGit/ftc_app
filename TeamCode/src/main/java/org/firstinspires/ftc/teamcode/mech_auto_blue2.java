@@ -32,6 +32,9 @@ public class mech_auto_blue2 extends LinearOpMode {
     private DcMotor drivelb;
     private DcMotor driverb;
     private Servo jewelHitter;
+    private DcMotor intakeLeft;
+    private DcMotor intakeRight;
+    private DcMotor glyphDumper;
     private LynxI2cColorRangeSensor colorRange;
     private BNO055IMU imu;
     private Orientation angles;
@@ -46,12 +49,23 @@ public class mech_auto_blue2 extends LinearOpMode {
         driverf = hardwareMap.dcMotor.get("driverf");
         drivelb = hardwareMap.dcMotor.get("drivelb");
         driverb = hardwareMap.dcMotor.get("driverb");
+        intakeLeft = hardwareMap.get(DcMotor.class, "intakeLeft");
+        intakeRight = hardwareMap.get(DcMotor.class, "intakeRight");
+        glyphDumper = hardwareMap.get(DcMotor.class,"glyphDumper");
         drivelf.setDirection(DcMotor.Direction.REVERSE);
         driverb.setDirection(DcMotor.Direction.REVERSE);
+        intakeLeft.setDirection(DcMotor.Direction.REVERSE);
         drivelf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         drivelb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         driverf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         driverb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        drivelf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        driverf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        drivelb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        driverb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        glyphDumper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         jewelHitter = hardwareMap.servo.get("jewelHitter");
         colorRange = (LynxI2cColorRangeSensor) hardwareMap.get("color");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -315,5 +329,9 @@ public class mech_auto_blue2 extends LinearOpMode {
         drivetime(0.5,0.5,0.5,0.5,1000);
         sleep(2000);
         drivetime(-0.5,-0.5,-0.5,-0.5,300);
+        glyphDumper.setPower(-1.0);
+        sleep(1000);
+        glyphDumper.setPower(1.0);
+        sleep(1000);
     }
 }

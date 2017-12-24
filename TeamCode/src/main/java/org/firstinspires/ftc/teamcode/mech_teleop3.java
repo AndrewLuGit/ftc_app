@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.lynx.LynxI2cColorRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 
@@ -21,9 +23,11 @@ public class mech_teleop3 extends LinearOpMode {
     private DcMotor intakeLeft;
     private DcMotor intakeRight;
     private DcMotor glyphDumper;
+    private LynxI2cColorRangeSensor colorRange;
     private Servo jewelHitter;
     private double k =1;
     private double intakePower;
+    private Servo glyphLifter;
     @Override
     public void runOpMode() {
 
@@ -38,13 +42,14 @@ public class mech_teleop3 extends LinearOpMode {
         intakeLeft = hardwareMap.get(DcMotor.class, "intakeLeft");
         intakeRight = hardwareMap.get(DcMotor.class, "intakeRight");
         glyphDumper = hardwareMap.get(DcMotor.class,"glyphDumper");
+        glyphLifter = hardwareMap.get(Servo.class,"glyphLifter");
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
 
         drivelf.setDirection(DcMotor.Direction.REVERSE);
         driverb.setDirection(DcMotor.Direction.REVERSE);
         intakeLeft.setDirection(DcMotor.Direction.REVERSE);
-
+        glyphDumper.setDirection(DcMotor.Direction.REVERSE);
         //Set all motors to brake at zero power mode
 
         drivelf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -89,8 +94,10 @@ public class mech_teleop3 extends LinearOpMode {
             intakeRight.setPower(intakePower);
             if (gamepad1.right_bumper || gamepad2.right_bumper) {
                 glyphDumper.setPower(0.5);
+                glyphLifter.setPosition(1.0);
             } else if (gamepad1.right_trigger>=0.1 || gamepad2.right_trigger>=0.1) {
                 glyphDumper.setPower(-0.5);
+                glyphLifter.setPosition(0.5);
             } else {
                 glyphDumper.setPower(0);
             }
