@@ -40,6 +40,7 @@ public class mech_auto_red1 extends LinearOpMode {
     private DcMotor intakeLeft;
     private DcMotor intakeRight;
     private DcMotor glyphDumper;
+    private Servo glyphLifter;
     private LynxI2cColorRangeSensor colorRange;
     private BNO055IMU imu;
     private Orientation angles;
@@ -75,6 +76,7 @@ public class mech_auto_red1 extends LinearOpMode {
        intakeLeft = hardwareMap.get(DcMotor.class, "intakeLeft");
        intakeRight = hardwareMap.get(DcMotor.class, "intakeRight");
        glyphDumper = hardwareMap.get(DcMotor.class,"glyphDumper");
+       glyphLifter = hardwareMap.get(Servo.class,"glyphLifter");
        driverf.setDirection(DcMotor.Direction.REVERSE);
        drivelb.setDirection(DcMotor.Direction.REVERSE);
        intakeLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -127,31 +129,27 @@ public class mech_auto_red1 extends LinearOpMode {
         imu.startAccelerationIntegration(new Position(), new Velocity(), 20);
         /* lower jewel hitter, wait until in position */
 
-        jewelHitter.setPosition(0.6);
-
+        //jewelHitter.setPosition(0.6);
+/*
         while (jewelHitter.getPosition()!=0.6) {
             sleep(100);
             telemetry.addData("Servo Position",jewelHitter.getPosition());
             telemetry.update();
         }
-        sleep(200);
+        //sleep(200);
 
-        kickOpponentJewel(myTeamRed);
+        //kickOpponentJewel(myTeamRed);
         /* get my pit location by scan the Vumark */
-        updateMyPitLocation();
+        //updateMyPitLocation();
 
         //test_position_sensor();
         //test_encode();
         //test_moveto();
 
         /* get to the right postion before unload Glyphs */
-        scorePositioning();
+        //scorePositioning();
         /* unloading */
-        scoreGlyphs();
-        imu.stopAccelerationIntegration();
-        while (opModeIsActive()) {
-            telemetry.update();
-        }
+        //scoreGlyphs();
         imu.stopAccelerationIntegration();
     }
 
@@ -563,30 +561,35 @@ public class mech_auto_red1 extends LinearOpMode {
             to_center = 12;
             if (myBSPosition == 1) {
                 distance = (to_center + offset);
-            } else if (myBSPosition == 3) {
+                encoderDrive(DRIVE_SPEED,36,36,4);
+                imudrive(90,0.17);
+            } else {
                 distance = -(to_center + offset);
+                encoderDrive(DRIVE_SPEED,-36,-36,4);
+                imudrive(-90,0.17);
             }
-            encoderDrive(DRIVE_SPEED,36,36,4);
+            encoderDrive(DRIVE_SPEED, distance, distance,4);
         }
         if (myBSPosition == 2 || myBSPosition == 4) {
             to_center = 36;
             if (myBSPosition == 2) {
                 distance = (to_center + offset);
-            } else if (myBSPosition == 4) {
+            } else {
                 distance = -(to_center + offset);
             }
             encoderDrive(DRIVE_SPEED, distance, distance, 4.0);
             imudrive(-90, 0.17);
-
         }
     }
     private void scoreGlyphs() {
         encoderDrive(DRIVE_SPEED,12,12,2);
         sleep(200);
         encoderDrive(DRIVE_SPEED,-3.5,-3.5,1.5);
-        glyphDumper.setPower(-1.0);
-        sleep(100);
-        glyphDumper.setPower(1.0);
+        glyphLifter.setPosition(1.0);
+        glyphDumper.setPower(-0.5);
+        sleep(1000);
+        glyphLifter.setPosition(0.5);
+        glyphDumper.setPower(0.5);
         sleep(1000);
         glyphDumper.setPower(0);
     }

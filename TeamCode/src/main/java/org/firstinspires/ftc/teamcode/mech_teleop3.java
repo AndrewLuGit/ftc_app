@@ -50,6 +50,10 @@ public class mech_teleop3 extends LinearOpMode {
         driverb.setDirection(DcMotor.Direction.REVERSE);
         intakeLeft.setDirection(DcMotor.Direction.REVERSE);
         glyphDumper.setDirection(DcMotor.Direction.REVERSE);
+        drivelf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        driverf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        drivelb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        driverb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //Set all motors to brake at zero power mode
 
         drivelf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -64,7 +68,11 @@ public class mech_teleop3 extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         waitForStart();
-
+        jewelHitter.setPosition(0.05);
+        drivelf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        driverf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        drivelb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        driverb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             double r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
@@ -102,5 +110,9 @@ public class mech_teleop3 extends LinearOpMode {
                 glyphDumper.setPower(0);
             }
         }
+        drivelf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        driverf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        drivelb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        driverb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 }
