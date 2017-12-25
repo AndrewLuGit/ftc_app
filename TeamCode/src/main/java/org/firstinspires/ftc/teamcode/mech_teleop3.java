@@ -43,6 +43,7 @@ public class mech_teleop3 extends LinearOpMode {
         intakeRight = hardwareMap.get(DcMotor.class, "intakeRight");
         glyphDumper = hardwareMap.get(DcMotor.class,"glyphDumper");
         glyphLifter = hardwareMap.get(Servo.class,"glyphLifter");
+        jewelHitter = hardwareMap.get(Servo.class,"jewelHitter");
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
 

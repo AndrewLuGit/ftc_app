@@ -47,7 +47,7 @@ public class mech_auto_red1 extends LinearOpMode {
     private OpenGLMatrix lastLocation = null;
     private VuforiaLocalizer vuforia;
     private BNO055IMU.AccelerationIntegrator myIntegrator;
-    private boolean myTeamRed = true;
+    private boolean myTeamRed = false;
     private int myBSPosition = 4; /* 1: top lfts 2: top right 3: bottom lfts 4:bootom right */
     private int myPictoLocation = 0;    /* 1 : lfts 0: center -1 : right */
 
@@ -129,27 +129,27 @@ public class mech_auto_red1 extends LinearOpMode {
         imu.startAccelerationIntegration(new Position(), new Velocity(), 20);
         /* lower jewel hitter, wait until in position */
 
-        //jewelHitter.setPosition(0.6);
-/*
+        jewelHitter.setPosition(0.6);
+
         while (jewelHitter.getPosition()!=0.6) {
             sleep(100);
             telemetry.addData("Servo Position",jewelHitter.getPosition());
             telemetry.update();
         }
-        //sleep(200);
+        sleep(200);
 
-        //kickOpponentJewel(myTeamRed);
+        kickOpponentJewel(myTeamRed);
         /* get my pit location by scan the Vumark */
-        //updateMyPitLocation();
+        updateMyPitLocation();
 
         //test_position_sensor();
         //test_encode();
         //test_moveto();
 
         /* get to the right postion before unload Glyphs */
-        //scorePositioning();
+        scorePositioning();
         /* unloading */
-        //scoreGlyphs();
+        scoreGlyphs();
         imu.stopAccelerationIntegration();
     }
 
@@ -571,7 +571,7 @@ public class mech_auto_red1 extends LinearOpMode {
             encoderDrive(DRIVE_SPEED, distance, distance,4);
         }
         if (myBSPosition == 2 || myBSPosition == 4) {
-            to_center = 36;
+            to_center = 34;
             if (myBSPosition == 2) {
                 distance = (to_center + offset);
             } else {
@@ -592,6 +592,7 @@ public class mech_auto_red1 extends LinearOpMode {
         glyphDumper.setPower(0.5);
         sleep(1000);
         glyphDumper.setPower(0);
+        encoderDrive(DRIVE_SPEED,-1,-1,2);
     }
     private void imudistance(double distance, double drivespeed) {
 
