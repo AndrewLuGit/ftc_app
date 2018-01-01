@@ -128,7 +128,7 @@ public class mech_auto_red1 extends LinearOpMode {
         waitForStart();
         imu.startAccelerationIntegration(new Position(), new Velocity(), 20);
         /* lower jewel hitter, wait until in position */
-/*
+
         jewelHitter.setPosition(0.6);
 
         while (jewelHitter.getPosition()!=0.6) {
@@ -139,18 +139,18 @@ public class mech_auto_red1 extends LinearOpMode {
         sleep(200);
 
         kickOpponentJewel(myTeamRed);
-        */
+
         /* get my pit location by scan the Vumark */
-      //  updateMyPitLocation();
+        updateMyPitLocation();
         //test_imudrive();
         //test_position_sensor();
-        test_encode();
+        //test_encode();
         //test_moveto();
 
         /* get to the right postion before unload Glyphs */
-      //  scorePositioning();
+        scorePositioning();
         /* unloading */
-      //  scoreGlyphs();
+        scoreGlyphs();
         imu.stopAccelerationIntegration();
     }
 
