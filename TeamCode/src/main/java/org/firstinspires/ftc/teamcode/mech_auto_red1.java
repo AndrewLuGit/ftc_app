@@ -128,7 +128,7 @@ public class mech_auto_red1 extends LinearOpMode {
         waitForStart();
         imu.startAccelerationIntegration(new Position(), new Velocity(), 20);
         /* lower jewel hitter, wait until in position */
-
+/*
         jewelHitter.setPosition(0.6);
 
         while (jewelHitter.getPosition()!=0.6) {
@@ -139,17 +139,18 @@ public class mech_auto_red1 extends LinearOpMode {
         sleep(200);
 
         kickOpponentJewel(myTeamRed);
+        */
         /* get my pit location by scan the Vumark */
-        updateMyPitLocation();
-
+      //  updateMyPitLocation();
+        //test_imudrive();
         //test_position_sensor();
-        //test_encode();
+        test_encode();
         //test_moveto();
 
         /* get to the right postion before unload Glyphs */
-        scorePositioning();
+      //  scorePositioning();
         /* unloading */
-        scoreGlyphs();
+      //  scoreGlyphs();
         imu.stopAccelerationIntegration();
     }
 
@@ -210,7 +211,7 @@ public class mech_auto_red1 extends LinearOpMode {
                     drivelf.getCurrentPosition(),
                     driverf.getCurrentPosition());
             telemetry.update();
-            sleep(10);
+            sleep(20);
         }
 
         // Stop all motion;
@@ -225,17 +226,12 @@ public class mech_auto_red1 extends LinearOpMode {
         drivelb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         driverb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        drivelf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        driverf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        drivelf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        driverf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
     }
 
     private void test_encode() {
-        encoderDrive(DRIVE_SPEED,  24,  24, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
-        encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+        encoderDrive(0.3,  24,  24, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
+        //encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+       // encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
     }
 
     /* The following function is to revert normalize happening in library,  it is not desired
@@ -306,13 +302,13 @@ public class mech_auto_red1 extends LinearOpMode {
         /* test 45 dergress */
         imudrive(45, 0.17);
         sleep(20);
-        imudrive(90, 0.17);
-        sleep(20);
+        //imudrive(90, 0.17);
+        //sleep(20);
         imudrive(45, 0.17);
         sleep(20);
        // imudrive(60, 0.17);
        // sleep(1000);
-       // imudrive(-120, 0.17);
+        imudrive(-120, 0.17);
        // sleep(1000);
        // imudrive(-100, 0.17);
     }
@@ -325,7 +321,7 @@ public class mech_auto_red1 extends LinearOpMode {
         double y_offset = destination.y - current.y;
         /* initial imu is on 90 degree position,  so we need switch x_offset with y_offse when
          * caculate turning degree.  whether to moving forward or moving backward depends on x,y
-         * postion
+         * position
          */
         double turn_degree = - Math.atan2(x_offset, y_offset);
         int count = 0;
@@ -339,13 +335,14 @@ public class mech_auto_red1 extends LinearOpMode {
         telemetry.addData("turn degree", turn_degree);
         telemetry.addData("distance", distance);
         telemetry.update();
-        sleep(1000);
+        sleep(5000);
+        /*
         imudrive(turn_degree, 0.17);
         if (y_offset < 0) {
             distance = -distance;
         }
 
-        while (Math.abs(distance) > 0.5) {
+        while (Math.abs(distance) > 1) {
             imudrive(turn_degree, 0.17);
             if (++count >3) break;
 
@@ -365,6 +362,7 @@ public class mech_auto_red1 extends LinearOpMode {
             telemetry.addData("turn degree", turn_degree);
             telemetry.update();
         }
+        */
     }
 
     private void test_moveto() {
@@ -378,9 +376,9 @@ public class mech_auto_red1 extends LinearOpMode {
     private void test_position_sensor() {
         Position current = imu.getPosition();
         telemetry.addData("current position",  "%s", current.toString());
-        encoderDrive(DRIVE_SPEED,  24,  24, 5.0);
+        encoderDrive(DRIVE_SPEED,  12,  12, 5.0);
         imudrive(90, 0.17);
-        encoderDrive(DRIVE_SPEED,  24,  24, 5.0);
+        encoderDrive(DRIVE_SPEED,  12,  12, 5.0);
         Position destination = imu.getPosition();
         telemetry.addData("new position",  "%s", destination.toString());
         double x_offset = destination.x - current.x;
@@ -571,11 +569,11 @@ public class mech_auto_red1 extends LinearOpMode {
             encoderDrive(DRIVE_SPEED, distance, distance,4);
         }
         if (myBSPosition == 2 || myBSPosition == 4) {
-            to_center = 34;
+            to_center = 36;
             if (myBSPosition == 2) {
-                distance = (to_center + offset);
+                distance = (to_center + 2 + offset);
             } else {
-                distance = -(to_center + offset);
+                distance = -(to_center - 2 + offset);
             }
             encoderDrive(DRIVE_SPEED, distance, distance, 4.0);
             imudrive(-90, 0.17);
