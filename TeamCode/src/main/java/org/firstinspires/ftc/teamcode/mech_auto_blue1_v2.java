@@ -30,8 +30,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 /**
  * Autonomous for Relic Recovery
  */
-@Autonomous(name="Red 2",group="mechanum")
-public class mech_auto_red2 extends LinearOpMode {
+@Autonomous(name="Blue 1",group="mechanum")
+public class mech_auto_blue1_v2 extends LinearOpMode {
     private DcMotor drivelf;
     private DcMotor driverf;
     private DcMotor drivelb;
@@ -47,8 +47,8 @@ public class mech_auto_red2 extends LinearOpMode {
     private OpenGLMatrix lastLocation = null;
     private VuforiaLocalizer vuforia;
     private BNO055IMU.AccelerationIntegrator myIntegrator;
-    private final boolean myTeamRed = true;
-    private int myBSPosition = 2; /* 1: top lfts 2: top right 3: bottom lfts 4:bootom right */
+    private final boolean myTeamRed = false; // true to false 1/2/2018
+    private int myBSPosition = 3; /* 1: top lfts 2: top right 3: bottom lfts 4:bootom right */
     private int myPictoLocation = 0;    /* 1 : lfts 0: center -1 : right */
 
     static final double     COUNTS_PER_MOTOR_REV    = 1120 ;    // eg: TETRIX Motor Encoder
@@ -56,69 +56,69 @@ public class mech_auto_red2 extends LinearOpMode {
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double     DRIVE_SPEED             = 0.4;
+    static final double     DRIVE_SPEED             = 0.7;
     static final double     TURN_SPEED              = 0.6;
-    static final double     MY_K1              = 0.17;
+    static final double     MY_K1              = 0.17; // gary change MY_K1 = 0.17  1/2/2018 gary change 2 1/2/2018 MY_K1 = 0.19 to make robot go farther
 
     //------------------------------------------------------------------------------------------------
     // Construction
     //------------------------------------------------------------------------------------------------
 
-    public void initialize () {
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        VuforiaLocalizer.Parameters paramters2 = new VuforiaLocalizer.Parameters();
+   public void initialize () {
+       BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+       VuforiaLocalizer.Parameters paramters2 = new VuforiaLocalizer.Parameters();
 
-        telemetry.addLine("Init dcMotor");
-        telemetry.addLine("get dirve");
-        drivelf = hardwareMap.dcMotor.get("drivelf");
-        driverf = hardwareMap.dcMotor.get("driverf");
-        drivelb = hardwareMap.dcMotor.get("drivelb");
-        driverb = hardwareMap.dcMotor.get("driverb");
-        intakeLeft = hardwareMap.get(DcMotor.class, "intakeLeft");
-        intakeRight = hardwareMap.get(DcMotor.class, "intakeRight");
-        glyphDumper = hardwareMap.get(DcMotor.class,"glyphDumper");
-        glyphLifter = hardwareMap.get(Servo.class,"glyphLifter");
-        driverf.setDirection(DcMotor.Direction.REVERSE);
-        drivelb.setDirection(DcMotor.Direction.REVERSE);
-        intakeLeft.setDirection(DcMotor.Direction.REVERSE);
-        telemetry.addLine("reset encode");
+       telemetry.addLine("Init dcMotor");
+       telemetry.addLine("get dirve");
+       drivelf = hardwareMap.dcMotor.get("drivelf");
+       driverf = hardwareMap.dcMotor.get("driverf");
+       drivelb = hardwareMap.dcMotor.get("drivelb");
+       driverb = hardwareMap.dcMotor.get("driverb");
+       intakeLeft = hardwareMap.get(DcMotor.class, "intakeLeft");
+       intakeRight = hardwareMap.get(DcMotor.class, "intakeRight");
+       glyphDumper = hardwareMap.get(DcMotor.class,"glyphDumper");
+       glyphLifter = hardwareMap.get(Servo.class,"glyphLifter");
+       driverf.setDirection(DcMotor.Direction.REVERSE);
+       drivelb.setDirection(DcMotor.Direction.REVERSE);
+       intakeLeft.setDirection(DcMotor.Direction.REVERSE);
+       telemetry.addLine("reset encode");
 
-        drivelf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        driverf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        drivelb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        driverb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        drivelf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        driverf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        drivelb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        driverb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intakeLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intakeRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        glyphDumper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        telemetry.addLine("Init IMU");
-        myIntegrator = new FineAccelerationIntegrator();
-        parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag          = "IMU";
-        parameters.accelerationIntegrationAlgorithm = myIntegrator;
-        imu = hardwareMap.get(BNO055IMU.class,"imu");
-        imu.initialize(parameters);
+       drivelf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+       driverf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+       drivelb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+       driverb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+       drivelf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+       driverf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+       drivelb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+       driverb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+       intakeLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+       intakeRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+       glyphDumper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+       telemetry.addLine("Init IMU");
+       myIntegrator = new FineAccelerationIntegrator();
+       parameters = new BNO055IMU.Parameters();
+       parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+       parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+       parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
+       parameters.loggingEnabled      = true;
+       parameters.loggingTag          = "IMU";
+       parameters.accelerationIntegrationAlgorithm = myIntegrator;
+       imu = hardwareMap.get(BNO055IMU.class,"imu");
+       imu.initialize(parameters);
 
-        jewelHitter = hardwareMap.servo.get("jewelHitter");
-        colorRange = (LynxI2cColorRangeSensor) hardwareMap.get("color");
-        telemetry.addLine("Init Vuforia");
-        paramters2.vuforiaLicenseKey = "AVpbLJb/////AAAAGXZuk17KREdul0PqldXjI4ETC+yUOY/0Kn2QZcusavTR02WKxGvyI4E5oodS5Jta30WYJtnJuH7AhLaMe8grr9UC2U3qlnQkypIAZsR8xa38f669mVIo9wujvkZpHzvscPZGdZ2NaheUepxU/asMbuldnDOo3TjSYiiEbk1N3OkxdTeMa4W+BOyrO6sD8L7bcPfnFpmuOPRv0+NeEUL638AjNyi+GQeHYaSLsu6u4ONKtwF+axjjg0W+LRgp5T/5oWxexW3fgoMrkijzsJ0I5OuxSdCeZ3myJthxcyHwHqdhuxmWFvFOoYgJ4k6LdGNijymNWqMp97utjg8YXMAguMLJU2QkPJvZQqbkzIdjzzQk";
-        paramters2.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
-        vuforia = ClassFactory.createVuforiaLocalizer(paramters2);
+       jewelHitter = hardwareMap.servo.get("jewelHitter");
+       colorRange = (LynxI2cColorRangeSensor) hardwareMap.get("color");
+       telemetry.addLine("Init Vuforia");
+       paramters2.vuforiaLicenseKey = "AVpbLJb/////AAAAGXZuk17KREdul0PqldXjI4ETC+yUOY/0Kn2QZcusavTR02WKxGvyI4E5oodS5Jta30WYJtnJuH7AhLaMe8grr9UC2U3qlnQkypIAZsR8xa38f669mVIo9wujvkZpHzvscPZGdZ2NaheUepxU/asMbuldnDOo3TjSYiiEbk1N3OkxdTeMa4W+BOyrO6sD8L7bcPfnFpmuOPRv0+NeEUL638AjNyi+GQeHYaSLsu6u4ONKtwF+axjjg0W+LRgp5T/5oWxexW3fgoMrkijzsJ0I5OuxSdCeZ3myJthxcyHwHqdhuxmWFvFOoYgJ4k6LdGNijymNWqMp97utjg8YXMAguMLJU2QkPJvZQqbkzIdjzzQk";
+       paramters2.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
+       vuforia = ClassFactory.createVuforiaLocalizer(paramters2);
 
-        telemetry.addLine("Init Vuforia");
+       telemetry.addLine("Init Vuforia");
 
-        jewelHitter.setPosition(0.05);
-        telemetry.addLine("Init Ready");
-        telemetry.update();
-    }
+       jewelHitter.setPosition(0.05);
+       telemetry.addLine("Init Ready");
+       telemetry.update();
+   }
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -156,8 +156,8 @@ public class mech_auto_red2 extends LinearOpMode {
 
 
     private  void encoderDrive(double speed,
-                               double leftInches, double rightInches,
-                               double timeoutS) {
+                             double leftInches, double rightInches,
+                             double timeoutS) {
         int newLeftTarget;
         int newRightTarget;
 
@@ -181,13 +181,13 @@ public class mech_auto_red2 extends LinearOpMode {
         drivelb.setTargetPosition(newLeftTarget);
         driverb.setTargetPosition(newRightTarget);
 
-        // Turn On RUN_TO_POSITION
+            // Turn On RUN_TO_POSITION
         drivelf.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driverf.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         drivelb.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driverb.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        // reset the timeout time and start motion.
+            // reset the timeout time and start motion.
         runtime.reset();
         drivelf.setPower(Math.abs(speed));
         driverf.setPower(Math.abs(speed));
@@ -219,7 +219,7 @@ public class mech_auto_red2 extends LinearOpMode {
         driverf.setPower(0);
         drivelb.setPower(0);
         driverb.setPower(0);
-        // Turn off RUN_TO_POSITION
+            // Turn off RUN_TO_POSITION
 
         drivelf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         driverf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -311,11 +311,11 @@ public class mech_auto_red2 extends LinearOpMode {
         sleep(20);
         imudrive(45, MY_K1);
         sleep(20);
-        // imudrive(60, MY_K1);
-        // sleep(1000);
-        // imudrive(-120, MY_K1);
-        // sleep(1000);
-        // imudrive(-100, MY_K1);
+       // imudrive(60, MY_K1);
+       // sleep(1000);
+       // imudrive(-120, MY_K1);
+       // sleep(1000);
+       // imudrive(-100, MY_K1);
     }
 
 
@@ -568,9 +568,8 @@ public class mech_auto_red2 extends LinearOpMode {
             to_center = 12;
             if (myBSPosition == 1) {
                 distance = (to_center + offset);
-                encoderDrive(DRIVE_SPEED,24,24,4);
+                encoderDrive(DRIVE_SPEED,36,36,4);
                 imudrive(90,MY_K1);
-                encoderDrive(DRIVE_SPEED,-12,-12,4);
             } else {
                 distance = -(to_center + offset);
                 encoderDrive(DRIVE_SPEED,-36,-36,4);
@@ -592,7 +591,7 @@ public class mech_auto_red2 extends LinearOpMode {
     private void scoreGlyphs() {
         encoderDrive(DRIVE_SPEED,12,12,2);
         sleep(200);
-        encoderDrive(DRIVE_SPEED,-4,-4,1.5);
+        encoderDrive(DRIVE_SPEED,-3.5,-3.5,1.5);
         glyphLifter.setPosition(1.0);
         glyphDumper.setPower(-0.5);
         sleep(1000);
@@ -600,7 +599,9 @@ public class mech_auto_red2 extends LinearOpMode {
         glyphDumper.setPower(0.5);
         sleep(1000);
         glyphDumper.setPower(0);
-        encoderDrive(DRIVE_SPEED,-3.5,-3.5,2);
+        encoderDrive(DRIVE_SPEED,-1,-1,2);
     }
+    private void imudistance(double distance, double drivespeed) {
 
+    }
 }
