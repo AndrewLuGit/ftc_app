@@ -47,77 +47,78 @@ public class mech_auto_red1 extends LinearOpMode {
     private OpenGLMatrix lastLocation = null;
     private VuforiaLocalizer vuforia;
     private BNO055IMU.AccelerationIntegrator myIntegrator;
-    private boolean myTeamRed = false;
-    private int myBSPosition = 4; /* 1: top lfts 2: top right 3: bottom lfts 4:bootom right */
-    private int myPictoLocation = 0;    /* 1 : lfts 0: center -1 : right */
+    private final boolean myTeamRed = true;
+    private int myBSPosition = 1; /* 1: top lfts 2: top right 3: bottom lfts 4:bootom right */
+    private int myPictoLocation = 0;    /* 1 : left 0: center -1 : right */
 
     static final double     COUNTS_PER_MOTOR_REV    = 1120 ;    // eg: TETRIX Motor Encoder
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double     DRIVE_SPEED             = 0.7;
+    static final double     DRIVE_SPEED             = 0.4;
     static final double     TURN_SPEED              = 0.6;
+    static final double     MY_K1              = 0.17; // gary change MY_K1 = 0.17  1/2/2018 gary change 2 1/2/2018 MY_K1 = 0.19 to make robot go farther
 
     //------------------------------------------------------------------------------------------------
     // Construction
     //------------------------------------------------------------------------------------------------
 
-   public void initialize () {
-       BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-       VuforiaLocalizer.Parameters paramters2 = new VuforiaLocalizer.Parameters();
+    public void initialize () {
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        VuforiaLocalizer.Parameters paramters2 = new VuforiaLocalizer.Parameters();
 
-       telemetry.addLine("Init dcMotor");
-       telemetry.addLine("get dirve");
-       drivelf = hardwareMap.dcMotor.get("drivelf");
-       driverf = hardwareMap.dcMotor.get("driverf");
-       drivelb = hardwareMap.dcMotor.get("drivelb");
-       driverb = hardwareMap.dcMotor.get("driverb");
-       intakeLeft = hardwareMap.get(DcMotor.class, "intakeLeft");
-       intakeRight = hardwareMap.get(DcMotor.class, "intakeRight");
-       glyphDumper = hardwareMap.get(DcMotor.class,"glyphDumper");
-       glyphLifter = hardwareMap.get(Servo.class,"glyphLifter");
-       driverf.setDirection(DcMotor.Direction.REVERSE);
-       drivelb.setDirection(DcMotor.Direction.REVERSE);
-       intakeLeft.setDirection(DcMotor.Direction.REVERSE);
-       telemetry.addLine("reset encode");
+        telemetry.addLine("Init dcMotor");
+        telemetry.addLine("get dirve");
+        drivelf = hardwareMap.dcMotor.get("drivelf");
+        driverf = hardwareMap.dcMotor.get("driverf");
+        drivelb = hardwareMap.dcMotor.get("drivelb");
+        driverb = hardwareMap.dcMotor.get("driverb");
+        intakeLeft = hardwareMap.get(DcMotor.class, "intakeLeft");
+        intakeRight = hardwareMap.get(DcMotor.class, "intakeRight");
+        glyphDumper = hardwareMap.get(DcMotor.class,"glyphDumper");
+        glyphLifter = hardwareMap.get(Servo.class,"glyphLifter");
+        driverf.setDirection(DcMotor.Direction.REVERSE);
+        drivelb.setDirection(DcMotor.Direction.REVERSE);
+        intakeLeft.setDirection(DcMotor.Direction.REVERSE);
+        telemetry.addLine("reset encode");
 
-       drivelf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-       driverf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-       drivelb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-       driverb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-       drivelf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-       driverf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-       drivelb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-       driverb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-       intakeLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-       intakeRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-       glyphDumper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-       telemetry.addLine("Init IMU");
-       myIntegrator = new FineAccelerationIntegrator();
-       parameters = new BNO055IMU.Parameters();
-       parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-       parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-       parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
-       parameters.loggingEnabled      = true;
-       parameters.loggingTag          = "IMU";
-       parameters.accelerationIntegrationAlgorithm = myIntegrator;
-       imu = hardwareMap.get(BNO055IMU.class,"imu");
-       imu.initialize(parameters);
+        drivelf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        driverf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        drivelb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        driverb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        drivelf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        driverf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        drivelb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        driverb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        glyphDumper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        telemetry.addLine("Init IMU");
+        myIntegrator = new FineAccelerationIntegrator();
+        parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
+        parameters.loggingEnabled      = true;
+        parameters.loggingTag          = "IMU";
+        parameters.accelerationIntegrationAlgorithm = myIntegrator;
+        imu = hardwareMap.get(BNO055IMU.class,"imu");
+        imu.initialize(parameters);
 
-       jewelHitter = hardwareMap.servo.get("jewelHitter");
-       colorRange = (LynxI2cColorRangeSensor) hardwareMap.get("color");
-       telemetry.addLine("Init Vuforia");
-       paramters2.vuforiaLicenseKey = "AVpbLJb/////AAAAGXZuk17KREdul0PqldXjI4ETC+yUOY/0Kn2QZcusavTR02WKxGvyI4E5oodS5Jta30WYJtnJuH7AhLaMe8grr9UC2U3qlnQkypIAZsR8xa38f669mVIo9wujvkZpHzvscPZGdZ2NaheUepxU/asMbuldnDOo3TjSYiiEbk1N3OkxdTeMa4W+BOyrO6sD8L7bcPfnFpmuOPRv0+NeEUL638AjNyi+GQeHYaSLsu6u4ONKtwF+axjjg0W+LRgp5T/5oWxexW3fgoMrkijzsJ0I5OuxSdCeZ3myJthxcyHwHqdhuxmWFvFOoYgJ4k6LdGNijymNWqMp97utjg8YXMAguMLJU2QkPJvZQqbkzIdjzzQk";
-       paramters2.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
-       vuforia = ClassFactory.createVuforiaLocalizer(paramters2);
+        jewelHitter = hardwareMap.servo.get("jewelHitter");
+        colorRange = (LynxI2cColorRangeSensor) hardwareMap.get("color");
+        telemetry.addLine("Init Vuforia");
+        paramters2.vuforiaLicenseKey = "AVpbLJb/////AAAAGXZuk17KREdul0PqldXjI4ETC+yUOY/0Kn2QZcusavTR02WKxGvyI4E5oodS5Jta30WYJtnJuH7AhLaMe8grr9UC2U3qlnQkypIAZsR8xa38f669mVIo9wujvkZpHzvscPZGdZ2NaheUepxU/asMbuldnDOo3TjSYiiEbk1N3OkxdTeMa4W+BOyrO6sD8L7bcPfnFpmuOPRv0+NeEUL638AjNyi+GQeHYaSLsu6u4ONKtwF+axjjg0W+LRgp5T/5oWxexW3fgoMrkijzsJ0I5OuxSdCeZ3myJthxcyHwHqdhuxmWFvFOoYgJ4k6LdGNijymNWqMp97utjg8YXMAguMLJU2QkPJvZQqbkzIdjzzQk";
+        paramters2.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
+        vuforia = ClassFactory.createVuforiaLocalizer(paramters2);
 
-       telemetry.addLine("Init Vuforia");
+        telemetry.addLine("Init Vuforia");
 
-       jewelHitter.setPosition(0.05);
-       telemetry.addLine("Init Ready");
-       telemetry.update();
-   }
+        jewelHitter.setPosition(0.05);
+        telemetry.addLine("Init Ready");
+        telemetry.update();
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -136,7 +137,7 @@ public class mech_auto_red1 extends LinearOpMode {
             telemetry.addData("Servo Position",jewelHitter.getPosition());
             telemetry.update();
         }
-        sleep(200);
+        sleep(1000);
 
         kickOpponentJewel(myTeamRed);
         /* get my pit location by scan the Vumark */
@@ -155,8 +156,8 @@ public class mech_auto_red1 extends LinearOpMode {
 
 
     private  void encoderDrive(double speed,
-                             double leftInches, double rightInches,
-                             double timeoutS) {
+                               double leftInches, double rightInches,
+                               double timeoutS) {
         int newLeftTarget;
         int newRightTarget;
 
@@ -180,13 +181,13 @@ public class mech_auto_red1 extends LinearOpMode {
         drivelb.setTargetPosition(newLeftTarget);
         driverb.setTargetPosition(newRightTarget);
 
-            // Turn On RUN_TO_POSITION
+        // Turn On RUN_TO_POSITION
         drivelf.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driverf.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         drivelb.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driverb.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            // reset the timeout time and start motion.
+        // reset the timeout time and start motion.
         runtime.reset();
         drivelf.setPower(Math.abs(speed));
         driverf.setPower(Math.abs(speed));
@@ -218,7 +219,7 @@ public class mech_auto_red1 extends LinearOpMode {
         driverf.setPower(0);
         drivelb.setPower(0);
         driverb.setPower(0);
-            // Turn off RUN_TO_POSITION
+        // Turn off RUN_TO_POSITION
 
         drivelf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         driverf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -304,17 +305,17 @@ public class mech_auto_red1 extends LinearOpMode {
     private void test_imudrive(){
 
         /* test 45 dergress */
-        imudrive(45, 0.17);
+        imudrive(45, MY_K1);
         sleep(20);
-        imudrive(90, 0.17);
+        imudrive(90, MY_K1);
         sleep(20);
-        imudrive(45, 0.17);
+        imudrive(45, MY_K1);
         sleep(20);
-       // imudrive(60, 0.17);
-       // sleep(1000);
-       // imudrive(-120, 0.17);
-       // sleep(1000);
-       // imudrive(-100, 0.17);
+        // imudrive(60, MY_K1);
+        // sleep(1000);
+        // imudrive(-120, MY_K1);
+        // sleep(1000);
+        // imudrive(-100, MY_K1);
     }
 
 
@@ -340,13 +341,13 @@ public class mech_auto_red1 extends LinearOpMode {
         telemetry.addData("distance", distance);
         telemetry.update();
         sleep(1000);
-        imudrive(turn_degree, 0.17);
+        imudrive(turn_degree, MY_K1);
         if (y_offset < 0) {
             distance = -distance;
         }
 
         while (Math.abs(distance) > 0.5) {
-            imudrive(turn_degree, 0.17);
+            imudrive(turn_degree, MY_K1);
             if (++count >3) break;
 
             telemetry.addData("driving distance", distance);
@@ -379,7 +380,7 @@ public class mech_auto_red1 extends LinearOpMode {
         Position current = imu.getPosition();
         telemetry.addData("current position",  "%s", current.toString());
         encoderDrive(DRIVE_SPEED,  24,  24, 5.0);
-        imudrive(90, 0.17);
+        imudrive(90, MY_K1);
         encoderDrive(DRIVE_SPEED,  24,  24, 5.0);
         Position destination = imu.getPosition();
         telemetry.addData("new position",  "%s", destination.toString());
@@ -415,13 +416,14 @@ public class mech_auto_red1 extends LinearOpMode {
 
     private int  redAtRight() {
         sleep(100);
-        if (colorRange.red() > colorRange.blue() && colorRange.red()>=100) {
+        telemetry.addLine("red " + colorRange.red() + " blue: " + colorRange.blue());
+        if (colorRange.red() > colorRange.blue()) {
             telemetry.addLine("red at right");
             sleep(20);
             if (colorRange.red() > colorRange.blue()) {
                 return 1;
             }
-        } else if (colorRange.red() < colorRange.blue() && colorRange.blue()>=100){
+        } else if (colorRange.red() < colorRange.blue()){
             telemetry.addLine("red at left");
             return 0;
         }
@@ -431,17 +433,19 @@ public class mech_auto_red1 extends LinearOpMode {
     private void kickOpponentJewel(boolean teamRed) {
          /* Detect the color */
         if (teamRed) {
-            telemetry.addLine("Team red");
+            telemetry.addLine("0101 Team red");
             /* kick blue */
-            if (redAtRight() == 1) {
+            final int rar = redAtRight();
+            telemetry.addLine("color value: " + rar);
+            if (rar == 1) {
                 kickLeft(true);
-            } else if (redAtRight() == 0) {
+            } else if (rar == 0) {
                 kickLeft(false);
             } else {
                 jewelHitter.setPosition(0.05);
             }
         } else { /*kick red */
-            telemetry.addLine("Team blue");
+            telemetry.addLine("0101 Team blue");
             if (redAtRight() == 1) {
                 kickLeft(false);
             } else if(redAtRight() == 0) {
@@ -494,7 +498,7 @@ public class mech_auto_red1 extends LinearOpMode {
             telemetry.addData("get position center", myPictoLocation );
         } else if (vuMark==RelicRecoveryVuMark.RIGHT) {
             myPictoLocation = -1;
-            telemetry.addData("get position center", myPictoLocation );
+            telemetry.addData("get position right", myPictoLocation );
         }
         telemetry.update();
         encoderDrive(TURN_SPEED,   - offset, offset, 4.0);
@@ -502,6 +506,7 @@ public class mech_auto_red1 extends LinearOpMode {
         telemetry.update();
     }
 
+    /*
     private void getOffAdjust() {
         if (myBSPosition == 1) {
             drivetime(1.0,1.0,1.0,1.0,1500);
@@ -515,8 +520,9 @@ public class mech_auto_red1 extends LinearOpMode {
             encoderDrive(DRIVE_SPEED, -24, -24, 4.0);
         }
     }
+    */
 
-
+    /*
     private void adjustScoreAngel() {
         if (myBSPosition == 1 ) {
             imudrive(-90,0.3);
@@ -529,6 +535,7 @@ public class mech_auto_red1 extends LinearOpMode {
             imudrive(45,0.3);
         }
     }
+*/
 
     private double LocationOffset() {
         double offset = 0;
@@ -558,33 +565,35 @@ public class mech_auto_red1 extends LinearOpMode {
         double distance = 0;
 
         if (myBSPosition == 1 || myBSPosition == 3) {
-            to_center = 12;
+            to_center = 27;
             if (myBSPosition == 1) {
                 distance = (to_center + offset);
-                encoderDrive(DRIVE_SPEED,36,36,4);
-                imudrive(90,0.17);
+                encoderDrive(DRIVE_SPEED,28,28,4);
+                imudrive(90,MY_K1);
+                encoderDrive(DRIVE_SPEED,-12,-12,4);
             } else {
                 distance = -(to_center + offset);
                 encoderDrive(DRIVE_SPEED,-36,-36,4);
-                imudrive(-90,0.17);
+                imudrive(-90,MY_K1);
             }
             encoderDrive(DRIVE_SPEED, distance, distance,4);
+            imudrive(-90,MY_K1);
         }
         if (myBSPosition == 2 || myBSPosition == 4) {
-            to_center = 34;
+            to_center = 36;
             if (myBSPosition == 2) {
                 distance = (to_center + offset);
             } else {
                 distance = -(to_center + offset);
             }
             encoderDrive(DRIVE_SPEED, distance, distance, 4.0);
-            imudrive(-90, 0.17);
+            imudrive(-90, MY_K1);
         }
     }
     private void scoreGlyphs() {
         encoderDrive(DRIVE_SPEED,12,12,2);
         sleep(200);
-        encoderDrive(DRIVE_SPEED,-3.5,-3.5,1.5);
+        encoderDrive(DRIVE_SPEED,-4,-4,1.5);
         glyphLifter.setPosition(1.0);
         glyphDumper.setPower(-0.5);
         sleep(1000);
@@ -592,9 +601,7 @@ public class mech_auto_red1 extends LinearOpMode {
         glyphDumper.setPower(0.5);
         sleep(1000);
         glyphDumper.setPower(0);
-        encoderDrive(DRIVE_SPEED,-1,-1,2);
+        encoderDrive(DRIVE_SPEED,-3.5,-3.5,2);
     }
-    private void imudistance(double distance, double drivespeed) {
 
-    }
 }
