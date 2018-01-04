@@ -58,7 +58,7 @@ public class mech_auto_red1 extends LinearOpMode {
             (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double     DRIVE_SPEED             = 0.4;
     static final double     TURN_SPEED              = 0.6;
-    static final double     MY_K1              = 0.17; // gary change MY_K1 = 0.17  1/2/2018 gary change 2 1/2/2018 MY_K1 = 0.19 to make robot go farther
+    static final double     MY_K1              = 0.17; // Jan 4th gary change MY_K1 = 0.17  1/2/2018 gary change 2 1/2/2018 MY_K1 = 0.19 to make robot go farther
 
     //------------------------------------------------------------------------------------------------
     // Construction
