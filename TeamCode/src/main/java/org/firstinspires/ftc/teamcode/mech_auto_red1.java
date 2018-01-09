@@ -166,38 +166,34 @@ public class mech_auto_red1 extends LinearOpMode {
 
 
     private  void encoderDrive(double speed,
-                               double leftInches, double rightInches,
+                               double leftInches,
+                               double rightInches,
                                double timeoutS) {
         int newLeftTarget;
         int newRightTarget;
 
+       /* reset encode counter */
+        drivelf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        driverf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        drivelb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        driverb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         ElapsedTime runtime = new ElapsedTime();
-
-        drivelf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        driverf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        drivelf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        driverf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        // Determine new target position, and pass to motor controller
-        newLeftTarget = drivelf.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-        newRightTarget = driverf.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
-        Logging.log("Front wheel Running to %7d :%7d", newLeftTarget,  newRightTarget);
-
-        drivelf.setTargetPosition(newLeftTarget);
-        driverf.setTargetPosition(newRightTarget);
-
-        newLeftTarget = drivelb.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-        newRightTarget = driverb.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
-
-        drivelb.setTargetPosition(newLeftTarget);
-        driverb.setTargetPosition(newRightTarget);
-        Logging.log("back wheel Running to %7d :%7d", newLeftTarget,  newRightTarget);
-
-        // Turn On RUN_TO_POSITION
         drivelf.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driverf.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         drivelb.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driverb.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        // Determine new target position, and pass to motor controller
+        newLeftTarget = (int)(leftInches * COUNTS_PER_INCH);
+        newRightTarget = (int)(rightInches * COUNTS_PER_INCH);
+        Logging.log("Front wheel Running to %7d :%7d", newLeftTarget,  newRightTarget);
+
+        drivelf.setTargetPosition(newLeftTarget);
+        drivelb.setTargetPosition(newLeftTarget);
+        driverf.setTargetPosition(newRightTarget);
+        driverb.setTargetPosition(newRightTarget);
+
 
         // reset the timeout time and start motion.
         runtime.reset();
@@ -213,7 +209,6 @@ public class mech_auto_red1 extends LinearOpMode {
         // always end the motion as soon as possible.
         // However, if you require that BOTH motors have finished their moves before the robot continues
         // onto the next step, use (isBusy() || isBusy()) in the loop test.
-        telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
 
         while (opModeIsActive()&& (runtime.seconds() < timeoutS) &&
                 (drivelf.isBusy() && driverf.isBusy())) {
@@ -225,7 +220,6 @@ public class mech_auto_red1 extends LinearOpMode {
             telemetry.update();
             Logging.log("Front wheel Running at %7d :%7d", drivelf.getCurrentPosition(), driverf.getCurrentPosition());
             Logging.log("back wheel Running at %7d :%7d", drivelb.getCurrentPosition(), driverb.getCurrentPosition());
-            sleep(10);
         }
 
         // Stop all motion;
@@ -233,17 +227,6 @@ public class mech_auto_red1 extends LinearOpMode {
         driverf.setPower(0);
         drivelb.setPower(0);
         driverb.setPower(0);
-        // Turn off RUN_TO_POSITION
-
-        drivelf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        driverf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        drivelb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        driverb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        drivelf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        driverf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        drivelf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        driverf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
     }
 
