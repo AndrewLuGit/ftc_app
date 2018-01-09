@@ -25,6 +25,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
+import java.io.IOException;
 
 
 /**
@@ -47,6 +48,7 @@ public class mech_auto_red1 extends LinearOpMode {
     private OpenGLMatrix lastLocation = null;
     private VuforiaLocalizer vuforia;
     private BNO055IMU.AccelerationIntegrator myIntegrator;
+    private Logging mylogger;
     private final boolean myTeamRed = true;
     private int myBSPosition = 1; /* 1: top lfts 2: top right 3: bottom lfts 4:bootom right */
     private int myPictoLocation = 0;    /* 1 : left 0: center -1 : right */
@@ -65,6 +67,13 @@ public class mech_auto_red1 extends LinearOpMode {
     //------------------------------------------------------------------------------------------------
 
     public void initialize () {
+        try {
+            Logging.setup();
+            Logging.log("Start Logging");
+        } catch (IOException e1) {
+
+            telemetry.addLine("Init Logging failed");
+        }
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         VuforiaLocalizer.Parameters paramters2 = new VuforiaLocalizer.Parameters();
 
@@ -118,6 +127,7 @@ public class mech_auto_red1 extends LinearOpMode {
         jewelHitter.setPosition(0.05);
         telemetry.addLine("Init Ready");
         telemetry.update();
+        Logging.log("Init succeed!");
     }
 
     @Override
@@ -171,6 +181,7 @@ public class mech_auto_red1 extends LinearOpMode {
         // Determine new target position, and pass to motor controller
         newLeftTarget = drivelf.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
         newRightTarget = driverf.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+        Logging.log("Front wheel Running to %7d :%7d", newLeftTarget,  newRightTarget);
 
         drivelf.setTargetPosition(newLeftTarget);
         driverf.setTargetPosition(newRightTarget);
@@ -180,6 +191,7 @@ public class mech_auto_red1 extends LinearOpMode {
 
         drivelb.setTargetPosition(newLeftTarget);
         driverb.setTargetPosition(newRightTarget);
+        Logging.log("back wheel Running to %7d :%7d", newLeftTarget,  newRightTarget);
 
         // Turn On RUN_TO_POSITION
         drivelf.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -201,16 +213,18 @@ public class mech_auto_red1 extends LinearOpMode {
         // always end the motion as soon as possible.
         // However, if you require that BOTH motors have finished their moves before the robot continues
         // onto the next step, use (isBusy() || isBusy()) in the loop test.
+        telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
 
         while (opModeIsActive()&& (runtime.seconds() < timeoutS) &&
                 (drivelf.isBusy() && driverf.isBusy())) {
 
             // Display it for the driver.
-            telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
             telemetry.addData("Path2",  "Running at %7d :%7d",
                     drivelf.getCurrentPosition(),
                     driverf.getCurrentPosition());
             telemetry.update();
+            Logging.log("Front wheel Running at %7d :%7d", drivelf.getCurrentPosition(), driverf.getCurrentPosition());
+            Logging.log("back wheel Running at %7d :%7d", drivelb.getCurrentPosition(), driverb.getCurrentPosition());
             sleep(10);
         }
 
@@ -269,11 +283,13 @@ public class mech_auto_red1 extends LinearOpMode {
         int count = 0;
 
         degree_offset = tarDegrees - currDegrees;
+        Logging.log("drive distance, %7d", currDegrees);
+        Logging.log("drive distance, %7d", degree_offset);
         while (opModeIsActive() && (Math.abs(degree_offset) > 0.6) ){
             if (++count >5)
                 break;
             drive_distance  = (degree_offset * k1);
-
+            Logging.log("drive distance, %7d", drive_distance);
             telemetry.addData("drive distance", drive_distance);
             encoderDrive(TURN_SPEED, -drive_distance , drive_distance, 5.0);  // S2: Turn Right 12 Inches with 5Sec timeout
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
@@ -281,6 +297,8 @@ public class mech_auto_red1 extends LinearOpMode {
             degree_offset = tarDegrees - currDegrees;
             telemetry.addData("current degree", currDegrees);
             telemetry.addData("Degrees_offset", degree_offset);
+            Logging.log("drive distance, %7d", currDegrees);
+            Logging.log("drive distance, %7d", degree_offset);
             telemetry.update();
         }
     }
