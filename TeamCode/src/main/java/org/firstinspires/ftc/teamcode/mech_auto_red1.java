@@ -287,10 +287,10 @@ public class mech_auto_red1 extends LinearOpMode {
     }
 
     private void drivetime(double lfPower,double rfPower, double lbPower, double rbPower,long milliseconds){
-        drivelf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        driverf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        drivelf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        driverf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        drivelf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        driverf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        drivelf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        driverf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         drivelf.setPower(lfPower);
         driverf.setPower(rfPower);
         drivelb.setPower(lbPower);
