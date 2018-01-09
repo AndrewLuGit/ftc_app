@@ -56,7 +56,7 @@ public class mech_auto_blue1_v2 extends LinearOpMode {
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double     DRIVE_SPEED             = 0.7;
+    static final double     DRIVE_SPEED             = 0.3;
     static final double     TURN_SPEED              = 0.6;
     static final double     MY_K1              = 0.17; // gary change MY_K1 = 0.17  1/2/2018 gary change 2 1/2/2018 MY_K1 = 0.19 to make robot go farther
 
@@ -78,7 +78,7 @@ public class mech_auto_blue1_v2 extends LinearOpMode {
        intakeRight = hardwareMap.get(DcMotor.class, "intakeRight");
        glyphDumper = hardwareMap.get(DcMotor.class,"glyphDumper");
        glyphLifter = hardwareMap.get(Servo.class,"glyphLifter");
-       driverf.setDirection(DcMotor.Direction.REVERSE);
+       drivelf.setDirection(DcMotor.Direction.REVERSE);
        drivelb.setDirection(DcMotor.Direction.REVERSE);
        intakeLeft.setDirection(DcMotor.Direction.REVERSE);
        telemetry.addLine("reset encode");
@@ -470,7 +470,7 @@ public class mech_auto_blue1_v2 extends LinearOpMode {
 
         while (vuMark == RelicRecoveryVuMark.UNKNOWN) {
 
-            if (offset < -12 ) {
+            if (offset < -8 ) {
                 myPictoLocation = 0;
                 telemetry.addData("can't figure out VuMark", offset);
                 telemetry.update();
@@ -565,17 +565,22 @@ public class mech_auto_blue1_v2 extends LinearOpMode {
         double distance = 0;
 
         if (myBSPosition == 1 || myBSPosition == 3) {
-            to_center = 12;
+            to_center = 27;
             if (myBSPosition == 1) {
                 distance = (to_center + offset);
-                encoderDrive(DRIVE_SPEED,36,36,4);
+                encoderDrive(DRIVE_SPEED,28,28,4);
                 imudrive(90,MY_K1);
+                encoderDrive(DRIVE_SPEED,-12,-12,4);
             } else {
                 distance = -(to_center + offset);
-                encoderDrive(DRIVE_SPEED,-36,-36,4);
-                imudrive(-90,MY_K1);
+                encoderDrive(DRIVE_SPEED,-28,-28,4);
+                imudrive(90,MY_K1);
+                encoderDrive(DRIVE_SPEED, -14, -14, 4);
             }
-            encoderDrive(DRIVE_SPEED, distance, distance,4);
+
+            encoderDrive(DRIVE_SPEED, -distance, -distance,4);
+            imudrive(90,MY_K1);
+
         }
         if (myBSPosition == 2 || myBSPosition == 4) {
             to_center = 36;
@@ -589,9 +594,13 @@ public class mech_auto_blue1_v2 extends LinearOpMode {
         }
     }
     private void scoreGlyphs() {
-        encoderDrive(DRIVE_SPEED,12,12,2);
+
+        encoderDrive(DRIVE_SPEED,8,8,2);
         sleep(200);
-        encoderDrive(DRIVE_SPEED,-3.5,-3.5,1.5);
+        encoderDrive(DRIVE_SPEED,-4,-4,1.5);
+        intakeLeft.setPower(0.7);
+        intakeRight.setPower(0.7);
+        sleep(500);
         glyphLifter.setPosition(1.0);
         glyphDumper.setPower(-0.5);
         sleep(1000);
@@ -599,9 +608,7 @@ public class mech_auto_blue1_v2 extends LinearOpMode {
         glyphDumper.setPower(0.5);
         sleep(1000);
         glyphDumper.setPower(0);
-        encoderDrive(DRIVE_SPEED,-1,-1,2);
+        encoderDrive(DRIVE_SPEED,-3.5,-3.5,2);
     }
-    private void imudistance(double distance, double drivespeed) {
 
-    }
 }

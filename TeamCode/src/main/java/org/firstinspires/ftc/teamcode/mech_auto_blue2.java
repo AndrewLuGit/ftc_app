@@ -77,7 +77,7 @@ public class mech_auto_blue2 extends LinearOpMode {
         intakeRight = hardwareMap.get(DcMotor.class, "intakeRight");
         glyphDumper = hardwareMap.get(DcMotor.class,"glyphDumper");
         glyphLifter = hardwareMap.get(Servo.class,"glyphLifter");
-        driverf.setDirection(DcMotor.Direction.REVERSE);
+        drivelf.setDirection(DcMotor.Direction.REVERSE);
         drivelb.setDirection(DcMotor.Direction.REVERSE);
         intakeLeft.setDirection(DcMotor.Direction.REVERSE);
         telemetry.addLine("reset encode");
@@ -86,6 +86,7 @@ public class mech_auto_blue2 extends LinearOpMode {
         driverf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         drivelb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         driverb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         drivelf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         driverf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         drivelb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
