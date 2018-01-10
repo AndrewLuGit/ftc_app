@@ -24,9 +24,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.plus;
 
 import java.io.IOException;
-
 
 /**
  * Autonomous for Relic Recovery
@@ -48,7 +48,8 @@ public class mech_auto_red1 extends LinearOpMode {
     private OpenGLMatrix lastLocation = null;
     private VuforiaLocalizer vuforia;
     private BNO055IMU.AccelerationIntegrator myIntegrator;
-    private Logging mylogger;
+    private Position startPosition = null;
+    private Position targetPosition = null;
     private final boolean myTeamRed = true;
     private int myBSPosition = 1; /* 1: top lfts 2: top right 3: bottom lfts 4:bootom right */
     private int myPictoLocation = 0;    /* 1 : left 0: center -1 : right */
@@ -125,6 +126,9 @@ public class mech_auto_red1 extends LinearOpMode {
         telemetry.addLine("Init Vuforia");
 
         jewelHitter.setPosition(0.05);
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 20);
+        startPosition = clonePosition(imu.getPosition());
+        Logging.log(" start position x= %7d, y= %7d", startPosition.x, startPosition.y);
         telemetry.addLine("Init Ready");
         telemetry.update();
         Logging.log("Init succeed!");
@@ -137,7 +141,6 @@ public class mech_auto_red1 extends LinearOpMode {
         initialize();
         /* start of the code */
         waitForStart();
-        imu.startAccelerationIntegration(new Position(), new Velocity(), 20);
         /* lower jewel hitter, wait until in position */
 
         jewelHitter.setPosition(0.6);
@@ -164,6 +167,18 @@ public class mech_auto_red1 extends LinearOpMode {
         imu.stopAccelerationIntegration();
     }
 
+    private Position clonePosition(Position a) {
+        return new Position(a.unit,
+                a.x, a.y, a.z,
+                a.acquisitionTime);
+    }
+    private Position normalizePosition(Position a) {
+        // imu start with 90 degree,  so need replace (x, y) with (y, -x)
+        return new Position(a.unit,
+                a.y, - a.x, a.z,
+                a.acquisitionTime);
+
+    }
 
     private  void encoderDrive(double speed,
                                double leftInches,
@@ -322,11 +337,11 @@ public class mech_auto_red1 extends LinearOpMode {
 
 
     private void moveto(Position destination) {
-        Position current = imu.getPosition();
+        Position current = normalizePosition(imu.getPosition());
         double x_offset = destination.x - current.x;
         double y_offset = destination.y - current.y;
         /* initial imu is on 90 degree position,  so we need switch x_offset with y_offse when
-         * caculate turning degree.  whether to moving forward or moving backward depends on x,y
+         * calculate turning degree.  whether to moving forward or moving backward depends on x,y
          * postion
          */
         double turn_degree = - Math.atan2(x_offset, y_offset);
