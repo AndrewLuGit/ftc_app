@@ -28,7 +28,7 @@ public class mech_teleop3 extends LinearOpMode {
     private double k =1;
     private double intakePower;
     private Servo glyphLifter;
-    private Servo glyphHolder;
+    //private Servo glyphHolder;
     @Override
     public void runOpMode() {
 
@@ -45,11 +45,11 @@ public class mech_teleop3 extends LinearOpMode {
         glyphDumper = hardwareMap.get(DcMotor.class,"glyphDumper");
         glyphLifter = hardwareMap.get(Servo.class,"glyphLifter");
         jewelHitter = hardwareMap.get(Servo.class,"jewelHitter");
-        glyphHolder = harwareMap.get(Servo.class, "glyphHolder");
+        //glyphHolder = hardwareMap.get(Servo.class, "glyphHolder");
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
 
-        drivelf.setDirection(DcMotor.Direction.REVERSE);
+        driverf.setDirection(DcMotor.Direction.REVERSE);
         driverb.setDirection(DcMotor.Direction.REVERSE);
         intakeLeft.setDirection(DcMotor.Direction.REVERSE);
         glyphDumper.setDirection(DcMotor.Direction.REVERSE);
@@ -72,7 +72,7 @@ public class mech_teleop3 extends LinearOpMode {
         telemetry.update();
         waitForStart();
         jewelHitter.setPosition(0.05);
-        glyphHolder.setPosition(0);
+        //glyphHolder.setPosition(0);
         drivelf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         driverf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         drivelb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -106,7 +106,7 @@ public class mech_teleop3 extends LinearOpMode {
             intakeRight.setPower(intakePower);
             if (gamepad1.right_bumper || gamepad2.right_bumper) {
                 glyphDumper.setPower(0.5);
-                glyphLifter.setPosition(1.0);
+                glyphLifter.setPosition(0.1);
             } else if (gamepad1.right_trigger>=0.1 || gamepad2.right_trigger>=0.1) {
                 glyphDumper.setPower(-0.5);
                 glyphLifter.setPosition(0.5);

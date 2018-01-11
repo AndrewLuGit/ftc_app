@@ -51,7 +51,7 @@ public class mech_auto_red1 extends LinearOpMode {
     private Position startPosition = null;
     private Position targetPosition = null;
     private final boolean myTeamRed = true;
-    private int myBSPosition = 1; /* 1: top lfts 2: top right 3: bottom lfts 4:bootom right */
+    private int myBSPosition = 2; /* 1: top lfts 2: top right 3: bottom lfts 4:bootom right */
     private int myPictoLocation = 0;    /* 1 : left 0: center -1 : right */
 
     static final double     COUNTS_PER_MOTOR_REV    = 1120 ;    // eg: TETRIX Motor Encoder
@@ -59,7 +59,7 @@ public class mech_auto_red1 extends LinearOpMode {
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double     DRIVE_SPEED             = 0.4;
+    static final double     DRIVE_SPEED             = 0.7;
     static final double     TURN_SPEED              = 0.6;
     static final double     MY_K1              = 0.17; // Jan 4th gary change MY_K1 = 0.17  1/2/2018 gary change 2 1/2/2018 MY_K1 = 0.19 to make robot go farther
 
@@ -128,7 +128,7 @@ public class mech_auto_red1 extends LinearOpMode {
         jewelHitter.setPosition(0.05);
         imu.startAccelerationIntegration(new Position(), new Velocity(), 20);
         startPosition = clonePosition(imu.getPosition());
-        Logging.log(" start position x= %7d, y= %7d", startPosition.x, startPosition.y);
+        Logging.log(" start position x= %.3f, y= %.3f", startPosition.x, startPosition.y);
         telemetry.addLine("Init Ready");
         telemetry.update();
         Logging.log("Init succeed!");
@@ -281,13 +281,13 @@ public class mech_auto_red1 extends LinearOpMode {
         int count = 0;
 
         degree_offset = tarDegrees - currDegrees;
-        Logging.log("drive distance, %7d", currDegrees);
-        Logging.log("drive distance, %7d", degree_offset);
+        Logging.log("drive distance, %.3f", currDegrees);
+        Logging.log("drive distance, %.3f", degree_offset);
         while (opModeIsActive() && (Math.abs(degree_offset) > 0.6) ){
             if (++count >5)
                 break;
             drive_distance  = (degree_offset * k1);
-            Logging.log("drive distance, %7d", drive_distance);
+            Logging.log("drive distance, %.3f", drive_distance);
             telemetry.addData("drive distance", drive_distance);
             encoderDrive(TURN_SPEED, -drive_distance , drive_distance, 5.0);  // S2: Turn Right 12 Inches with 5Sec timeout
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
@@ -295,8 +295,8 @@ public class mech_auto_red1 extends LinearOpMode {
             degree_offset = tarDegrees - currDegrees;
             telemetry.addData("current degree", currDegrees);
             telemetry.addData("Degrees_offset", degree_offset);
-            Logging.log("drive distance, %7d", currDegrees);
-            Logging.log("drive distance, %7d", degree_offset);
+            Logging.log("drive distance, %.3f", currDegrees);
+            Logging.log("drive distance, %.3f", degree_offset);
             telemetry.update();
         }
     }
@@ -486,15 +486,15 @@ public class mech_auto_red1 extends LinearOpMode {
 
         while (vuMark == RelicRecoveryVuMark.UNKNOWN) {
 
-            if (offset < -12 ) {
+            if (offset < -6 ) {
                 myPictoLocation = 0;
                 telemetry.addData("can't figure out VuMark", offset);
                 telemetry.update();
                 break;
             }
-            encoderDrive(TURN_SPEED,   -4, 4, 4.0);
+            encoderDrive(TURN_SPEED,   -2, 2, 4.0);
             sleep(200);
-            offset = offset - 4;
+            offset = offset - 2;
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
         }
         telemetry.addData("VuMark offset", offset );
@@ -579,6 +579,7 @@ public class mech_auto_red1 extends LinearOpMode {
         double offset = LocationOffset();
         double to_center;
         double distance = 0;
+        double bsoffset = 0.75;
 
         if (myBSPosition == 1 || myBSPosition == 3) {
             to_center = 27;
@@ -598,25 +599,31 @@ public class mech_auto_red1 extends LinearOpMode {
         if (myBSPosition == 2 || myBSPosition == 4) {
             to_center = 36;
             if (myBSPosition == 2) {
-                distance = (to_center + offset);
+                distance = (to_center + offset + bsoffset);
             } else {
-                distance = -(to_center + offset);
+                distance = -(to_center + offset - bsoffset);
             }
             encoderDrive(DRIVE_SPEED, distance, distance, 4.0);
+
             imudrive(-90, MY_K1);
         }
     }
     private void scoreGlyphs() {
         encoderDrive(DRIVE_SPEED,12,12,2);
         sleep(200);
-        encoderDrive(DRIVE_SPEED,-4,-4,1.5);
-        glyphLifter.setPosition(1.0);
+        encoderDrive(DRIVE_SPEED,-5,-5,1.5);
+        intakeLeft.setPower(0.8);
+        intakeRight.setPower(0.8);
+        glyphLifter.setPosition(0.0);
         glyphDumper.setPower(-0.5);
         sleep(1000);
         glyphLifter.setPosition(0.5);
         glyphDumper.setPower(0.5);
+        intakeLeft.setPower(0);
+        intakeRight.setPower(0);
         sleep(1000);
         glyphDumper.setPower(0);
+      //  encoderDrive(DRIVE_SPEED,2,2,1.5);
         encoderDrive(DRIVE_SPEED,-3.5,-3.5,2);
     }
 
