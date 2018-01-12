@@ -31,8 +31,8 @@ import java.io.IOException;
 /**
  * Autonomous for Relic Recovery
  */
-@Autonomous(name="Red 1",group="mechanum")
-public class mech_auto_red1 extends LinearOpMode {
+@Autonomous(name="blue 1",group="mechanum")
+public class mech_auto_bule1 extends LinearOpMode {
     private DcMotor drivelf;
     private DcMotor driverf;
     private DcMotor drivelb;
@@ -50,8 +50,8 @@ public class mech_auto_red1 extends LinearOpMode {
     private BNO055IMU.AccelerationIntegrator myIntegrator;
     private Position startPosition = null;
     private Position targetPosition = null;
-    private final boolean myTeamRed = true;
-    private int myBSPosition = 2; /* 1: top lfts 2: top right 3: bottom lfts 4:bootom right */
+    private final boolean myTeamRed = false;
+    private int myBSPosition = 3; /* 1: red 1 2: red 2  3: blue 1 4:blue 2*/
     private int myPictoLocation = 0;    /* 1 : left 0: center -1 : right */
 
     static final double     COUNTS_PER_MOTOR_REV    = 1120 ;    // eg: TETRIX Motor Encoder
@@ -150,20 +150,16 @@ public class mech_auto_red1 extends LinearOpMode {
             telemetry.addData("Servo Position",jewelHitter.getPosition());
             telemetry.update();
         }
-        sleep(1000);
+        sleep(200);
 
         kickOpponentJewel(myTeamRed);
         /* get my pit location by scan the Vumark */
         updateMyPitLocation();
 
-        //test_position_sensor();
-        //test_encode();
-        //test_moveto();
-
         /* get to the right postion before unload Glyphs */
         scorePositioning();
         /* unloading */
-        scoreGlyphs();
+        scoreGlyphs1();
         imu.stopAccelerationIntegration();
     }
 
@@ -582,15 +578,16 @@ public class mech_auto_red1 extends LinearOpMode {
         double bsoffset = 0.75;
 
         if (myBSPosition == 1 || myBSPosition == 3) {
-            to_center = 27;
+
+            to_center = 12;
             if (myBSPosition == 1) {
-                distance = (to_center + offset);
-                encoderDrive(DRIVE_SPEED,28,28,4);
+                distance = (to_center + offset + bsoffset);
+                encoderDrive(DRIVE_SPEED,24,24,4);
                 imudrive(90,MY_K1);
-                encoderDrive(DRIVE_SPEED,-12,-12,4);
+                //encoderDrive(DRIVE_SPEED,12,12,4);
             } else {
-                distance = -(to_center + offset);
-                encoderDrive(DRIVE_SPEED,-36,-36,4);
+                distance = -(to_center + offset - bsoffset);
+                encoderDrive(DRIVE_SPEED,-24,-24,4);
                 imudrive(-90,MY_K1);
             }
             encoderDrive(DRIVE_SPEED, distance, distance,4);
@@ -612,8 +609,9 @@ public class mech_auto_red1 extends LinearOpMode {
         encoderDrive(DRIVE_SPEED,12,12,2);
         sleep(200);
         encoderDrive(DRIVE_SPEED,-5,-5,1.5);
-        intakeLeft.setPower(0.8);
-        intakeRight.setPower(0.8);
+        intakeLeft.setPower(0.5);
+        intakeRight.setPower(0.5);
+        sleep(60);
         glyphLifter.setPosition(0.0);
         glyphDumper.setPower(-0.5);
         sleep(1000);
@@ -623,8 +621,39 @@ public class mech_auto_red1 extends LinearOpMode {
         intakeRight.setPower(0);
         sleep(1000);
         glyphDumper.setPower(0);
-      //  encoderDrive(DRIVE_SPEED,2,2,1.5);
+        encoderDrive(DRIVE_SPEED,2,2,1.5);
         encoderDrive(DRIVE_SPEED,-3.5,-3.5,2);
     }
 
+    private void scoreGlyphs1() {
+        /* touch the door */
+        encoderDrive(DRIVE_SPEED,12,12,2);
+        sleep(200);
+        /* leaving  enough space for drop the Glyph*/
+        encoderDrive(DRIVE_SPEED,-6,-6,1.5);
+        /* move Glyph out of convey belt for easy lifting */
+        intakeLeft.setPower(0.5);
+        intakeRight.setPower(0.5);
+        sleep(300);
+        /* start shooting, initially with bigger power then slow down */
+        glyphLifter.setPosition(0.0);
+        glyphDumper.setPower(-0.4);
+        sleep(400);
+        /* use less power to slow down, leaving enough time to make sure it reach to top */
+        glyphDumper.setPower(-0.3);
+        sleep(1000);
+        /* finish shoot,  reset everything */
+        intakeLeft.setPower(0);
+        intakeRight.setPower(0);
+        glyphLifter.setPosition(0.5);
+        glyphDumper.setPower(0.5);
+        sleep(800);
+        glyphDumper.setPower(0);
+        /* leave more room to drop glyph*/
+        encoderDrive(DRIVE_SPEED,-2,-2,1.0);
+        /* push it in */
+        encoderDrive(DRIVE_SPEED,5,5,1.0);
+        /* leave a space and stop */
+        encoderDrive(DRIVE_SPEED,-3.5,-3.5,1.0);
+    }
 }
