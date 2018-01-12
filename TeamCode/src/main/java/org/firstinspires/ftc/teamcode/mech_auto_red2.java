@@ -568,43 +568,49 @@ public class mech_auto_red2 extends LinearOpMode {
         return offset;
 
     }
-
     private void scorePositioning() {
 
          /*drive to cryptobox */
         double offset = LocationOffset();
         double to_center;
-        double distance = 0;
-        double bsoffset = 0.75;
+        double distance_h = 0;
+        double distance_v = 0;
+        double bsoffset1 = 0.5;   /* forwarding direction */
+        double bsoffset2 = 0.7;  /* jowler hit direction, make it longer?*/
 
         if (myBSPosition == 1 || myBSPosition == 3) {
 
             to_center = 12;
+            distance_v = 24 + bsoffset1;
             if (myBSPosition == 1) {
-                distance = (to_center + offset + bsoffset);
-                encoderDrive(DRIVE_SPEED,24,24,4);
+                distance_h = (to_center + offset + bsoffset2);
+                distance_v = 24 + bsoffset1;
+                encoderDrive(DRIVE_SPEED, distance_v ,distance_v,4);
                 imudrive(90,MY_K1);
                 //encoderDrive(DRIVE_SPEED,12,12,4);
             } else {
-                distance = -(to_center + offset - bsoffset);
-                encoderDrive(DRIVE_SPEED,-24,-24,4);
+                distance_h = -(to_center + offset + bsoffset2);
+                distance_v = -(24 - bsoffset1);
+                encoderDrive(DRIVE_SPEED, distance_v ,distance_v,4);
                 imudrive(-90,MY_K1);
             }
-            encoderDrive(DRIVE_SPEED, distance, distance,4);
+            encoderDrive(DRIVE_SPEED, distance_h, distance_h,4);
             imudrive(-90,MY_K1);
         }
         if (myBSPosition == 2 || myBSPosition == 4) {
             to_center = 36;
             if (myBSPosition == 2) {
-                distance = (to_center + offset + bsoffset);
+                distance_h = (to_center + offset + bsoffset1);
             } else {
-                distance = -(to_center + offset - bsoffset);
+                distance_h = -(to_center + offset - bsoffset1);
             }
-            encoderDrive(DRIVE_SPEED, distance, distance, 4.0);
+            encoderDrive(DRIVE_SPEED, distance_h, distance_h, 4.0);
 
             imudrive(-90, MY_K1);
+            encoderDrive(DRIVE_SPEED,-bsoffset2, -bsoffset2,1);
         }
     }
+
     private void scoreGlyphs() {
         encoderDrive(DRIVE_SPEED,12,12,2);
         sleep(200);
