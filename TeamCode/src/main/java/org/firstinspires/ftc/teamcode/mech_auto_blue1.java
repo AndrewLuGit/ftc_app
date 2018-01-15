@@ -1,12 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
-import com.qualcomm.hardware.bosch.NaiveAccelerationIntegrator;
 import com.qualcomm.hardware.lynx.LynxI2cColorRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -24,15 +21,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.plus;
 
 import java.io.IOException;
 
 /**
  * Autonomous for Relic Recovery
  */
-@Autonomous(name="Red 2",group="mechanum")
-public class mech_auto_red2 extends LinearOpMode {
+@Autonomous(name="Blue 1",group="mechanum")
+public class mech_auto_blue1 extends LinearOpMode {
     private DcMotor drivelf;
     private DcMotor driverf;
     private DcMotor drivelb;
@@ -50,8 +46,8 @@ public class mech_auto_red2 extends LinearOpMode {
     private BNO055IMU.AccelerationIntegrator myIntegrator;
     private Position startPosition = null;
     private Position targetPosition = null;
-    private final boolean myTeamRed = true;
-    private int myBSPosition = 2; /* 1: red 1 2: red 2  3: blue 1 4:blue 2*/
+    private final boolean myTeamRed = false;
+    private int myBSPosition = 3; /* 1: red 1 2: red 2  3: blue 1 4:blue 2*/
     private int myPictoLocation = 0;    /* 1 : left 0: center -1 : right */
 
     static final double     COUNTS_PER_MOTOR_REV    = 1120 ;    // eg: TETRIX Motor Encoder
@@ -159,8 +155,6 @@ public class mech_auto_red2 extends LinearOpMode {
         /* get to the right postion before unload Glyphs */
         scorePositioning();
         /* unloading */
-        scoreGlyphs1();
-        second_pick();
         scoreGlyphs1();
         imu.stopAccelerationIntegration();
     }
@@ -578,7 +572,7 @@ public class mech_auto_red2 extends LinearOpMode {
         double distance_h = 0;
         double distance_v = 0;
         double bsoffset1 = 0.5;   /* forwarding direction */
-        double bsoffset2 = 0.5;  /* jowler hit direction, make it longer?*/
+        double bsoffset2 = 0;  /* jowler hit direction, make it longer?*/
 
         if (myBSPosition == 1 || myBSPosition == 3) {
 
@@ -609,7 +603,7 @@ public class mech_auto_red2 extends LinearOpMode {
             encoderDrive(DRIVE_SPEED, distance_h, distance_h, 4.0);
 
             imudrive(-90, MY_K1);
-            //encoderDrive(DRIVE_SPEED,-bsoffset2, -bsoffset2,1);
+            encoderDrive(DRIVE_SPEED,-bsoffset2, -bsoffset2,1);
         }
     }
 
@@ -633,12 +627,13 @@ public class mech_auto_red2 extends LinearOpMode {
         encoderDrive(DRIVE_SPEED,-3.5,-3.5,2);
     }
 
+
     private void scoreGlyphs1() {
         /* touch the door */
-        encoderDrive(DRIVE_SPEED,15,15,4);
+        encoderDrive(DRIVE_SPEED, 12, 12, 4);
         sleep(200);
         /* leaving  enough space for drop the Glyph*/
-        encoderDrive(DRIVE_SPEED,-5.5,-5.5,2);
+        encoderDrive(DRIVE_SPEED, -5.5, -5.5                                                                                                        , 2);
         /* move Glyph out of convey belt for easy lifting */
         intakeLeft.setPower(0.4);
         intakeRight.setPower(0.4);
@@ -655,32 +650,10 @@ public class mech_auto_red2 extends LinearOpMode {
         sleep(800);
         glyphDumper.setPower(0);
         /* leave more room to drop glyph*/
-        encoderDrive(DRIVE_SPEED,-2,-2,1.0);
+        encoderDrive(DRIVE_SPEED, -2, -2, 1.0);
         /* push it in */
-        encoderDrive(DRIVE_SPEED,5,5,1.0);
+        encoderDrive(DRIVE_SPEED, 5, 5, 1.0);
         /* leave a space and stop */
-        encoderDrive(DRIVE_SPEED,-3.5,-3.5,1.0);
-    }
-    private void second_pick() {
-        encoderDrive(DRIVE_SPEED,-48,-48,10.0);
-        intakeLeft.setPower(1);
-        intakeRight.setPower(1);
-        sleep(300);
-        intakeLeft.setPower(0);
-        intakeRight.setPower(0);
-        encoderDrive(TURN_SPEED,4.,-4,5);
-        intakeLeft.setPower(1);
-        intakeRight.setPower(1);
-        sleep(300);
-        intakeLeft.setPower(0);
-        intakeRight.setPower(0);
-        encoderDrive(TURN_SPEED,-8,8,5);
-        intakeLeft.setPower(1);
-        intakeRight.setPower(1);
-        sleep(300);
-        intakeLeft.setPower(0);
-        intakeRight.setPower(0);
-        encoderDrive(TURN_SPEED,4,-4,5);
-        encoderDrive(DRIVE_SPEED,40,40,10);
+        encoderDrive(DRIVE_SPEED, -3.5, -3.5, 1.0);
     }
 }

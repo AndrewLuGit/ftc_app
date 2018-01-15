@@ -105,10 +105,10 @@ public class mech_teleop3 extends LinearOpMode {
             intakeLeft.setPower(intakePower);
             intakeRight.setPower(intakePower);
             if (gamepad1.right_bumper || gamepad2.right_bumper) {
-                glyphDumper.setPower(0.5);
+                glyphDumper.setPower(0.4);
                 glyphLifter.setPosition(0.1);
             } else if (gamepad1.right_trigger>=0.1 || gamepad2.right_trigger>=0.1) {
-                glyphDumper.setPower(-0.5);
+                glyphDumper.setPower(-0.4);
                 glyphLifter.setPosition(0.5);
             } else {
                 glyphDumper.setPower(0);

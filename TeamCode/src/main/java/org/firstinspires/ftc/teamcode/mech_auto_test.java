@@ -1,12 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
-import com.qualcomm.hardware.bosch.NaiveAccelerationIntegrator;
 import com.qualcomm.hardware.lynx.LynxI2cColorRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -24,14 +21,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-import static org.firstinspires.ftc.robotcore.external.navigation.NavUtil.plus;
 
 import java.io.IOException;
 
 /**
  * Autonomous for Relic Recovery
  */
-@Autonomous(name="test",group="mechanum")
+@Autonomous(name="Tester",group="mechanum")
 public class mech_auto_test extends LinearOpMode {
     private DcMotor drivelf;
     private DcMotor driverf;
@@ -142,22 +138,22 @@ public class mech_auto_test extends LinearOpMode {
         /* start of the code */
         waitForStart();
         /* lower jewel hitter, wait until in position */
-/*
-        jewelHitter.setPosition(0.6);
 
-        while (jewelHitter.getPosition()!=0.6) {
-            sleep(100);
-            telemetry.addData("Servo Position",jewelHitter.getPosition());
-            telemetry.update();
-        }
-        sleep(200);
+        //jewelHitter.setPosition(0.6);
 
-        kickOpponentJewel(myTeamRed); */
+        //while (jewelHitter.getPosition()!=0.6) {
+        //    sleep(100);
+        //    telemetry.addData("Servo Position",jewelHitter.getPosition());
+        //    telemetry.update();
+        //}
+        //sleep(200);
+
+        //kickOpponentJewel(myTeamRed);
         /* get my pit location by scan the Vumark */
-   //     updateMyPitLocation();
+        //updateMyPitLocation();
 
         /* get to the right postion before unload Glyphs */
-  //      scorePositioning();
+        //scorePositioning();
         /* unloading */
         scoreGlyphs1();
         imu.stopAccelerationIntegration();
@@ -568,7 +564,6 @@ public class mech_auto_test extends LinearOpMode {
         return offset;
 
     }
-
     private void scorePositioning() {
 
          /*drive to cryptobox */
@@ -577,7 +572,7 @@ public class mech_auto_test extends LinearOpMode {
         double distance_h = 0;
         double distance_v = 0;
         double bsoffset1 = 0.5;   /* forwarding direction */
-        double bsoffset2 = 0.7;  /* jowler hit direction, make it longer?*/
+        double bsoffset2 = 0.4;  /* jowler hit direction, make it longer?*/
 
         if (myBSPosition == 1 || myBSPosition == 3) {
 
@@ -611,6 +606,7 @@ public class mech_auto_test extends LinearOpMode {
             encoderDrive(DRIVE_SPEED,-bsoffset2, -bsoffset2,1);
         }
     }
+
     private void scoreGlyphs() {
         encoderDrive(DRIVE_SPEED,12,12,2);
         sleep(200);
@@ -631,23 +627,21 @@ public class mech_auto_test extends LinearOpMode {
         encoderDrive(DRIVE_SPEED,-3.5,-3.5,2);
     }
 
+
     private void scoreGlyphs1() {
         /* touch the door */
-        encoderDrive(DRIVE_SPEED,12,12,2);
+        encoderDrive(DRIVE_SPEED, 12, 12, 4);
         sleep(200);
         /* leaving  enough space for drop the Glyph*/
-        encoderDrive(DRIVE_SPEED,-6,-6,1.5);
+        encoderDrive(DRIVE_SPEED, -5, -5, 2);
         /* move Glyph out of convey belt for easy lifting */
-        intakeLeft.setPower(0.5);
-        intakeRight.setPower(0.5);
+        intakeLeft.setPower(0.4);
+        intakeRight.setPower(0.4);
         sleep(300);
         /* start shooting, initially with bigger power then slow down */
         glyphLifter.setPosition(0.0);
         glyphDumper.setPower(-0.4);
-        sleep(400);
-        /* use less power to slow down, leaving enough time to make sure it reach to top */
-        glyphDumper.setPower(-0.3);
-        sleep(1000);
+        sleep(1600);
         /* finish shoot,  reset everything */
         intakeLeft.setPower(0);
         intakeRight.setPower(0);
@@ -656,10 +650,10 @@ public class mech_auto_test extends LinearOpMode {
         sleep(800);
         glyphDumper.setPower(0);
         /* leave more room to drop glyph*/
-        encoderDrive(DRIVE_SPEED,-2,-2,1.0);
+        encoderDrive(DRIVE_SPEED, -2, -2, 1.0);
         /* push it in */
-        encoderDrive(DRIVE_SPEED,5,5,1.0);
+        encoderDrive(DRIVE_SPEED, 5, 5, 1.0);
         /* leave a space and stop */
-        encoderDrive(DRIVE_SPEED,-3.5,-3.5,1.0);
+        encoderDrive(DRIVE_SPEED, -3.5, -3.5, 1.0);
     }
 }
