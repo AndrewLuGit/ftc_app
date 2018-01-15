@@ -142,7 +142,7 @@ public class mech_auto_red2 extends LinearOpMode {
         /* start of the code */
         waitForStart();
         /* lower jewel hitter, wait until in position */
-
+/*
         jewelHitter.setPosition(0.6);
 
         while (jewelHitter.getPosition()!=0.6) {
@@ -151,17 +151,17 @@ public class mech_auto_red2 extends LinearOpMode {
             telemetry.update();
         }
         sleep(200);
-
-        kickOpponentJewel(myTeamRed);
+*/
+ //       kickOpponentJewel(myTeamRed);
         /* get my pit location by scan the Vumark */
-        updateMyPitLocation();
+ //       updateMyPitLocation();
 
         /* get to the right postion before unload Glyphs */
-        scorePositioning();
+ //       scorePositioning();
         /* unloading */
         scoreGlyphs1();
-        second_pick();
-        scoreGlyphs1();
+ //       second_pick();
+ //       scoreGlyphs1();
         imu.stopAccelerationIntegration();
     }
 
@@ -613,53 +613,43 @@ public class mech_auto_red2 extends LinearOpMode {
         }
     }
 
-    private void scoreGlyphs() {
-        encoderDrive(DRIVE_SPEED,12,12,2);
-        sleep(200);
-        encoderDrive(DRIVE_SPEED,-5,-5,1.5);
-        intakeLeft.setPower(0.5);
-        intakeRight.setPower(0.5);
-        sleep(60);
-        glyphLifter.setPosition(0.0);
-        glyphDumper.setPower(-0.5);
-        sleep(1000);
-        glyphLifter.setPosition(0.5);
-        glyphDumper.setPower(0.5);
-        intakeLeft.setPower(0);
-        intakeRight.setPower(0);
-        sleep(1000);
-        glyphDumper.setPower(0);
-        encoderDrive(DRIVE_SPEED,2,2,1.5);
-        encoderDrive(DRIVE_SPEED,-3.5,-3.5,2);
-    }
-
     private void scoreGlyphs1() {
         /* touch the door */
         encoderDrive(DRIVE_SPEED,15,15,4);
         sleep(200);
         /* leaving  enough space for drop the Glyph*/
-        encoderDrive(DRIVE_SPEED,-5.5,-5.5,2);
+        encoderDrive(DRIVE_SPEED,-4.5,-4.5,2);
         /* move Glyph out of convey belt for easy lifting */
         intakeLeft.setPower(0.4);
         intakeRight.setPower(0.4);
         sleep(300);
         /* start shooting, initially with bigger power then slow down */
         glyphLifter.setPosition(0.0);
-        glyphDumper.setPower(-0.4);
+        glyphDumper.setPower(-0.35);
         sleep(1600);
-        /* finish shoot,  reset everything */
         intakeLeft.setPower(0);
         intakeRight.setPower(0);
         glyphLifter.setPosition(0.5);
+        glyphDumper.setPower(-0.1);
+
+        /* turning to fix alignment issue:
+         */
+        encoderDrive(DRIVE_SPEED,-2,2,1.0);
+        encoderDrive(DRIVE_SPEED,-1.5,-1.5,1.0);
+
+        encoderDrive(DRIVE_SPEED,4,-4,1.0);
+
+       // encoderDrive(DRIVE_SPEED,-3,3,1.0);
+        /* leave more room to drop glyph*/
+        encoderDrive(DRIVE_SPEED,-2,-2,1.0);
+        /* finish shoot,  reset everything */
         glyphDumper.setPower(0.5);
         sleep(800);
         glyphDumper.setPower(0);
-        /* leave more room to drop glyph*/
-        encoderDrive(DRIVE_SPEED,-2,-2,1.0);
         /* push it in */
-        encoderDrive(DRIVE_SPEED,5,5,1.0);
+        encoderDrive(DRIVE_SPEED,6,6,1.5);
         /* leave a space and stop */
-        encoderDrive(DRIVE_SPEED,-3.5,-3.5,1.0);
+        encoderDrive(DRIVE_SPEED,-6,-6,1.0);
     }
     private void second_pick() {
         encoderDrive(DRIVE_SPEED,-48,-48,10.0);
