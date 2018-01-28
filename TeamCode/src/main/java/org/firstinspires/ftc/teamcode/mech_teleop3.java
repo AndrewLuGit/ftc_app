@@ -28,7 +28,7 @@ public class mech_teleop3 extends LinearOpMode {
     private double k =1;
     private double intakePower;
     private Servo glyphLifter;
-    //private Servo glyphHolder;
+    private Servo glyphHolder;
     @Override
     public void runOpMode() {
 
@@ -45,18 +45,13 @@ public class mech_teleop3 extends LinearOpMode {
         glyphDumper = hardwareMap.get(DcMotor.class,"glyphDumper");
         glyphLifter = hardwareMap.get(Servo.class,"glyphLifter");
         jewelHitter = hardwareMap.get(Servo.class,"jewelHitter");
-        //glyphHolder = hardwareMap.get(Servo.class, "glyphHolder");
+        glyphHolder = hardwareMap.get(Servo.class, "glyphHolder");
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
 
         driverf.setDirection(DcMotor.Direction.REVERSE);
         driverb.setDirection(DcMotor.Direction.REVERSE);
         intakeLeft.setDirection(DcMotor.Direction.REVERSE);
-        glyphDumper.setDirection(DcMotor.Direction.REVERSE);
-        drivelf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        driverf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        drivelb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        driverb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //Set all motors to brake at zero power mode
 
         drivelf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -72,11 +67,6 @@ public class mech_teleop3 extends LinearOpMode {
         telemetry.update();
         waitForStart();
         jewelHitter.setPosition(0.05);
-        //glyphHolder.setPosition(0);
-        drivelf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        driverf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        drivelb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        driverb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             double r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
@@ -107,16 +97,18 @@ public class mech_teleop3 extends LinearOpMode {
             if (gamepad1.right_bumper || gamepad2.right_bumper) {
                 glyphDumper.setPower(0.4);
                 glyphLifter.setPosition(0.1);
+                glyphHolder.setPosition(0.45);
             } else if (gamepad1.right_trigger>=0.1 || gamepad2.right_trigger>=0.1) {
                 glyphDumper.setPower(-0.4);
                 glyphLifter.setPosition(0.5);
             } else {
                 glyphDumper.setPower(0);
             }
+            if (gamepad1.dpad_left || gamepad2.dpad_left) {
+                glyphHolder.setPosition(0);
+            } else if (gamepad1.dpad_right || gamepad2.dpad_right) {
+                glyphHolder.setPosition(0.45);
+            }
         }
-        drivelf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        driverf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        drivelb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        driverb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 }
