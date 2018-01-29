@@ -37,7 +37,6 @@ public class mech_auto_red1 extends LinearOpMode {
     private DcMotor intakeLeft;
     private DcMotor intakeRight;
     private DcMotor glyphDumper;
-    private Servo glyphLifter;
     private LynxI2cColorRangeSensor colorRange;
     private BNO055IMU imu;
     private Orientation angles;
@@ -83,7 +82,6 @@ public class mech_auto_red1 extends LinearOpMode {
         intakeLeft = hardwareMap.get(DcMotor.class, "intakeLeft");
         intakeRight = hardwareMap.get(DcMotor.class, "intakeRight");
         glyphDumper = hardwareMap.get(DcMotor.class,"glyphDumper");
-        glyphLifter = hardwareMap.get(Servo.class,"glyphLifter");
         drivelf.setDirection(DcMotor.Direction.REVERSE);
         drivelb.setDirection(DcMotor.Direction.REVERSE);
         intakeLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -614,10 +612,8 @@ public class mech_auto_red1 extends LinearOpMode {
         intakeLeft.setPower(0.5);
         intakeRight.setPower(0.5);
         sleep(60);
-        glyphLifter.setPosition(0.0);
         glyphDumper.setPower(-0.5);
         sleep(1000);
-        glyphLifter.setPosition(0.5);
         glyphDumper.setPower(0.5);
         intakeLeft.setPower(0);
         intakeRight.setPower(0);
@@ -637,13 +633,11 @@ public class mech_auto_red1 extends LinearOpMode {
         intakeRight.setPower(0.4);
         sleep(300);
         /* start shooting, initially with bigger power then slow down */
-        glyphLifter.setPosition(0.0);
         glyphDumper.setPower(-0.4);
         sleep(1600);
         /* finish shoot,  reset everything */
         intakeLeft.setPower(0);
         intakeRight.setPower(0);
-        glyphLifter.setPosition(0.5);
         glyphDumper.setPower(0.5);
         sleep(800);
         glyphDumper.setPower(0);
@@ -654,7 +648,4 @@ public class mech_auto_red1 extends LinearOpMode {
         /* leave a space and stop */
         encoderDrive(DRIVE_SPEED, -3.5, -3.5, 1.0);
     }
-
-
-
 }
