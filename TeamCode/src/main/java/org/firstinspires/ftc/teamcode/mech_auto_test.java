@@ -46,7 +46,7 @@ public class mech_auto_test extends LinearOpMode {
     private BNO055IMU.AccelerationIntegrator myIntegrator;
     private Position startPosition = null;
     private Position targetPosition = null;
-    private final boolean myTeamRed = false;
+    private final boolean myTeamRed = true;
     private int myBSPosition = 2; /* 1: red 1 2: red 2  3: blue 1 4:blue 2*/
     private int myPictoLocation = 0;    /* 1 : left 0: center -1 : right */
 
@@ -144,14 +144,25 @@ public class mech_auto_test extends LinearOpMode {
         jewelHitter.setPosition(0.6);
         sleep(250);
         kickOpponentJewel(myTeamRed);
+
         /* get my pit location by scan the Vumark */
-        //updateMyPitLocation();
+        updateMyPitLocation();
 
         /* get to the right postion before unload Glyphs */
         scorePositioning();
         /* unloading */
-        scoreGlyphs1();
+        scoreGlyphs2();
         imu.stopAccelerationIntegration();
+    }
+
+    private void test_color_sensor()
+    {
+        while (opModeIsActive()) {
+            telemetry.addLine("red: " + colorRange.red() + " blue: " + colorRange.blue());
+            telemetry.update();
+            sleep(2000);
+            colorRange.red();
+        }
     }
 
     private Position clonePosition(Position a) {
@@ -416,20 +427,38 @@ public class mech_auto_test extends LinearOpMode {
             encoderDrive(TURN_SPEED,   -5, 5, 4.0);
         }
     }
+    private boolean colorValueValid(int val) {
+        if (val >= 8 && val <= 250  ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     private int  redAtRight() {
         sleep(500);
         telemetry.addLine("red " + colorRange.red() + " blue: " + colorRange.blue());
-        if (colorRange.red() > colorRange.blue()) {
+
+        /* check whether value is valid or not */
+        if (!colorValueValid(colorRange.red()) || !colorValueValid(colorRange.blue())) {
+            return -1;
+        }
+
+        if (colorRange.red() < colorRange.blue()) {
             telemetry.addLine("red at right");
             sleep(20);
-            if (colorRange.red() > colorRange.blue()) {
+            if (colorRange.red() < colorRange.blue()) {
                 return 1;
             }
-        } else if (colorRange.red() < colorRange.blue()){
+        } else if (colorRange.red() > colorRange.blue()){
             telemetry.addLine("red at left");
+            sleep(20);
+            if (colorRange.red() > colorRange.blue()) {
+                return 0;
+            }
             return 0;
         }
+        telemetry.update();
         return -1;
     }
 
@@ -509,36 +538,6 @@ public class mech_auto_test extends LinearOpMode {
         telemetry.update();
     }
 
-    /*
-    private void getOffAdjust() {
-        if (myBSPosition == 1) {
-            drivetime(1.0,1.0,1.0,1.0,1500);
-            imudrive(90,0.5);
-        } else if (myBSPosition == 2) {
-            drivetime(-1.0,-1.0,-1.0,-1.0,1500);
-        } else if (myBSPosition == 3) {
-            drivetime(-1.0,-1.0,-1.0,-1.0,1500);
-            imudrive(90,0.5);
-        } else {
-            encoderDrive(DRIVE_SPEED, -24, -24, 4.0);
-        }
-    }
-    */
-
-    /*
-    private void adjustScoreAngel() {
-        if (myBSPosition == 1 ) {
-            imudrive(-90,0.3);
-        } else if(myBSPosition == 2) {
-            imudrive(45,0.3);
-
-        }  else if(myBSPosition == 3) {
-            imudrive(90,0.3);
-        } else {
-            imudrive(45,0.3);
-        }
-    }
-*/
 
     private double LocationOffset() {
         double offset = 0;
@@ -567,7 +566,7 @@ public class mech_auto_test extends LinearOpMode {
         double distance_h = 0;
         double distance_v = 0;
         double bsoffset1 = 1;   /* forwarding direction */
-        double bsoffset2 = 1;  /* jowler hit direction, make it longer?*/
+        double bsoffset2 = 0;  /* jowler hit direction, make it longer?*/
 
         if (myBSPosition == 1 || myBSPosition == 3) {
 
@@ -602,30 +601,11 @@ public class mech_auto_test extends LinearOpMode {
         }
     }
 
-    private void scoreGlyphs() {
-        encoderDrive(DRIVE_SPEED,12,12,2);
-        sleep(200);
-        encoderDrive(DRIVE_SPEED,-5,-5,1.5);
-        intakeLeft.setPower(0.5);
-        intakeRight.setPower(0.5);
-        sleep(60);
-        glyphLifter.setPosition(0.0);
-        glyphDumper.setPower(-0.5);
-        sleep(1000);
-        glyphLifter.setPosition(0.5);
-        glyphDumper.setPower(0.5);
-        intakeLeft.setPower(0);
-        intakeRight.setPower(0);
-        sleep(1000);
-        glyphDumper.setPower(0);
-        encoderDrive(DRIVE_SPEED,2,2,1.5);
-        encoderDrive(DRIVE_SPEED,-3.5,-3.5,2);
-    }
 
 
     private void scoreGlyphs1() {
         /* touch the door */
-        encoderDrive(DRIVE_SPEED, 16, 16, 4);
+        encoderDrive(DRIVE_SPEED, 18, 18, 4);
         sleep(200);
         /* leaving  enough space for drop the Glyph*/
         encoderDrive(DRIVE_SPEED, -10, -10, 2);
@@ -642,7 +622,7 @@ public class mech_auto_test extends LinearOpMode {
         intakeRight.setPower(0);
         glyphLifter.setPosition(0.5);
         glyphDumper.setPower(-0.5);
-        sleep(800);
+        sleep(1000);
         glyphDumper.setPower(0);
         /* leave more room to drop glyph*/
         /* push it in */
@@ -653,5 +633,43 @@ public class mech_auto_test extends LinearOpMode {
         encoderDrive(TURN_SPEED,4,-4,1);
         /* leave a space and stop */
         encoderDrive(DRIVE_SPEED, -3.5, -3.5, 1.0);
+    }
+
+    private void scoreGlyphs2() {
+        /* touch the door */
+        encoderDrive(DRIVE_SPEED,17.5,17.5,4);
+        sleep(200);
+        /* leaving  enough space for drop the Glyph*/
+        encoderDrive(DRIVE_SPEED,-4.5,-4.5,2);
+        /* move Glyph out of convey belt for easy lifting */
+        intakeLeft.setPower(0.4);
+        intakeRight.setPower(0.4);
+        sleep(300);
+        /* start shooting, initially with bigger power then slow down */
+        glyphLifter.setPosition(0.0);
+        glyphDumper.setPower(0.35);
+        sleep(1600);
+        intakeLeft.setPower(0);
+        intakeRight.setPower(0);
+        glyphDumper.setPower(0.1);
+
+        /* turning to fix alignment issue:
+         */
+        encoderDrive(DRIVE_SPEED,-2,2,1.0);
+        encoderDrive(DRIVE_SPEED,-1.5,-1.5,1.0);
+        encoderDrive(DRIVE_SPEED,4,-4,1.0);
+
+        // encoderDrive(DRIVE_SPEED,-3,3,1.0);
+        /* leave more room to drop glyph*/
+        encoderDrive(DRIVE_SPEED,-2,-2,1.0);
+        /* finish shoot,  reset everything */
+        glyphDumper.setPower(-0.5);
+        sleep(800);
+        glyphDumper.setPower(0);
+        glyphLifter.setPosition(0.5);
+        /* push it in */
+        encoderDrive(DRIVE_SPEED,6,6,1.5);
+        /* leave a space and stop */
+        encoderDrive(DRIVE_SPEED,-6,-6,1.0);
     }
 }

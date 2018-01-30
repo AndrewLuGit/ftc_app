@@ -125,9 +125,8 @@ public class mech_auto_red2 extends LinearOpMode {
 
         telemetry.addLine("Init Vuforia");
 
-        jewelHitter.setPosition(0.05);
+        jewelHitter.setPosition(0.075);
         imu.startAccelerationIntegration(new Position(), new Velocity(), 20);
-        startPosition = clonePosition(imu.getPosition());
         Logging.log(" start position x= %.3f, y= %.3f", startPosition.x, startPosition.y);
         telemetry.addLine("Init Ready");
         telemetry.update();
@@ -142,40 +141,20 @@ public class mech_auto_red2 extends LinearOpMode {
         /* start of the code */
         waitForStart();
         /* lower jewel hitter, wait until in position */
-/*
+        jewelHitter.setPosition(0.52);
+        sleep(500);
         jewelHitter.setPosition(0.6);
-
-        while (jewelHitter.getPosition()!=0.6) {
-            sleep(100);
-            telemetry.addData("Servo Position",jewelHitter.getPosition());
-            telemetry.update();
-        }
-        sleep(200);
-*/
- //       kickOpponentJewel(myTeamRed);
+        sleep(250);
+        kickOpponentJewel(myTeamRed);
         /* get my pit location by scan the Vumark */
- //       updateMyPitLocation();
+        updateMyPitLocation();
 
         /* get to the right postion before unload Glyphs */
- //       scorePositioning();
+        scorePositioning();
         /* unloading */
-        scoreGlyphs1();
+        scoreGlyphs();
  //       second_pick();
- //       scoreGlyphs1();
         imu.stopAccelerationIntegration();
-    }
-
-    private Position clonePosition(Position a) {
-        return new Position(a.unit,
-                a.x, a.y, a.z,
-                a.acquisitionTime);
-    }
-    private Position normalizePosition(Position a) {
-        // imu start with 90 degree,  so need replace (x, y) with (y, -x)
-        return new Position(a.unit,
-                a.y, - a.x, a.z,
-                a.acquisitionTime);
-
     }
 
     private  void encoderDrive(double speed,
@@ -315,101 +294,6 @@ public class mech_auto_red2 extends LinearOpMode {
         driverb.setPower(0.0);
     }
 
-
-    private void test_imudrive(){
-
-        /* test 45 dergress */
-        imudrive(45, MY_K1);
-        sleep(20);
-        imudrive(90, MY_K1);
-        sleep(20);
-        imudrive(45, MY_K1);
-        sleep(20);
-        // imudrive(60, MY_K1);
-        // sleep(1000);
-        // imudrive(-120, MY_K1);
-        // sleep(1000);
-        // imudrive(-100, MY_K1);
-    }
-
-
-
-    private void moveto(Position destination) {
-        Position current = normalizePosition(imu.getPosition());
-        double x_offset = destination.x - current.x;
-        double y_offset = destination.y - current.y;
-        /* initial imu is on 90 degree position,  so we need switch x_offset with y_offse when
-         * calculate turning degree.  whether to moving forward or moving backward depends on x,y
-         * postion
-         */
-        double turn_degree = - Math.atan2(x_offset, y_offset);
-        int count = 0;
-
-        double distance =   Math.sqrt(x_offset * x_offset + y_offset * y_offset) / 25.4;
-
-        telemetry.addData("current position",  "%s", current.toString());
-        telemetry.addData("destination position",  "%s", destination.toString());
-        telemetry.addData("x_offset", x_offset);
-        telemetry.addData("y_offset", y_offset);
-        telemetry.addData("turn degree", turn_degree);
-        telemetry.addData("distance", distance);
-        telemetry.update();
-        sleep(1000);
-        imudrive(turn_degree, MY_K1);
-        if (y_offset < 0) {
-            distance = -distance;
-        }
-
-        while (Math.abs(distance) > 0.5) {
-            imudrive(turn_degree, MY_K1);
-            if (++count >3) break;
-
-            telemetry.addData("driving distance", distance);
-            encoderDrive(DRIVE_SPEED,  distance, distance , 5.0);
-            current = imu.getPosition();
-            telemetry.addData("current position",  "%s", current.toString());
-            x_offset = (destination.x - current.x);
-            y_offset = (destination.y - current.y);
-            turn_degree = - Math.atan2(x_offset, y_offset);
-            distance = Math.sqrt(x_offset * x_offset + y_offset * y_offset) / 25.4;
-            if (y_offset < 0) {
-                distance = -distance;
-            }
-            telemetry.addData("x_offset", x_offset);
-            telemetry.addData("y_offset", y_offset);
-            telemetry.addData("turn degree", turn_degree);
-            telemetry.update();
-        }
-    }
-
-    private void test_moveto() {
-        Position destination = new Position();
-        destination.x += 800;
-        destination.y += 800;
-        destination.unit = DistanceUnit.MM;
-        moveto(destination);
-    }
-
-    private void test_position_sensor() {
-        Position current = imu.getPosition();
-        telemetry.addData("current position",  "%s", current.toString());
-        encoderDrive(DRIVE_SPEED,  24,  24, 5.0);
-        imudrive(90, MY_K1);
-        encoderDrive(DRIVE_SPEED,  24,  24, 5.0);
-        Position destination = imu.getPosition();
-        telemetry.addData("new position",  "%s", destination.toString());
-        double x_offset = destination.x - current.x;
-        double y_offset = destination.y - current.y;
-        telemetry.addData("x_offset", x_offset);
-        telemetry.addData("y_offset", y_offset);
-        telemetry.update();
-        sleep(1000);
-        Position next = new Position();
-        next.x =0;
-        next.y= 0;
-        moveto(next);
-    }
-
     private void kickLeft(boolean isLeft)
     {
         if (isLeft) {
@@ -520,37 +404,6 @@ public class mech_auto_red2 extends LinearOpMode {
         telemetry.update();
     }
 
-    /*
-    private void getOffAdjust() {
-        if (myBSPosition == 1) {
-            drivetime(1.0,1.0,1.0,1.0,1500);
-            imudrive(90,0.5);
-        } else if (myBSPosition == 2) {
-            drivetime(-1.0,-1.0,-1.0,-1.0,1500);
-        } else if (myBSPosition == 3) {
-            drivetime(-1.0,-1.0,-1.0,-1.0,1500);
-            imudrive(90,0.5);
-        } else {
-            encoderDrive(DRIVE_SPEED, -24, -24, 4.0);
-        }
-    }
-    */
-
-    /*
-    private void adjustScoreAngel() {
-        if (myBSPosition == 1 ) {
-            imudrive(-90,0.3);
-        } else if(myBSPosition == 2) {
-            imudrive(45,0.3);
-
-        }  else if(myBSPosition == 3) {
-            imudrive(90,0.3);
-        } else {
-            imudrive(45,0.3);
-        }
-    }
-*/
-
     private double LocationOffset() {
         double offset = 0;
 
@@ -577,8 +430,8 @@ public class mech_auto_red2 extends LinearOpMode {
         double to_center;
         double distance_h = 0;
         double distance_v = 0;
-        double bsoffset1 = 0.5;   /* forwarding direction */
-        double bsoffset2 = 0.5;  /* jowler hit direction, make it longer?*/
+        double bsoffset1 = 1.0;   /* forwarding direction */
+        double bsoffset2 = 0;  /* jowler hit direction, make it longer?*/
 
         if (myBSPosition == 1 || myBSPosition == 3) {
 
@@ -609,13 +462,13 @@ public class mech_auto_red2 extends LinearOpMode {
             encoderDrive(DRIVE_SPEED, distance_h, distance_h, 4.0);
 
             imudrive(-90, MY_K1);
-            //encoderDrive(DRIVE_SPEED,-bsoffset2, -bsoffset2,1);
+            encoderDrive(DRIVE_SPEED,-bsoffset2, -bsoffset2,1);
         }
     }
 
-    private void scoreGlyphs1() {
+    private void scoreGlyphs() {
         /* touch the door */
-        encoderDrive(DRIVE_SPEED,15,15,4);
+        encoderDrive(DRIVE_SPEED,17.5,17.5,4);
         sleep(200);
         /* leaving  enough space for drop the Glyph*/
         encoderDrive(DRIVE_SPEED,-4.5,-4.5,2);
@@ -625,12 +478,11 @@ public class mech_auto_red2 extends LinearOpMode {
         sleep(300);
         /* start shooting, initially with bigger power then slow down */
         glyphLifter.setPosition(0.0);
-        glyphDumper.setPower(-0.35);
+        glyphDumper.setPower(0.35);
         sleep(1600);
         intakeLeft.setPower(0);
         intakeRight.setPower(0);
-        glyphLifter.setPosition(0.5);
-        glyphDumper.setPower(-0.1);
+        glyphDumper.setPower(0.1);
 
         /* turning to fix alignment issue:
          */
@@ -639,18 +491,21 @@ public class mech_auto_red2 extends LinearOpMode {
 
         encoderDrive(DRIVE_SPEED,4,-4,1.0);
 
-       // encoderDrive(DRIVE_SPEED,-3,3,1.0);
+        // encoderDrive(DRIVE_SPEED,-3,3,1.0);
         /* leave more room to drop glyph*/
         encoderDrive(DRIVE_SPEED,-2,-2,1.0);
         /* finish shoot,  reset everything */
-        glyphDumper.setPower(0.5);
+        glyphDumper.setPower(-0.5);
         sleep(800);
         glyphDumper.setPower(0);
+        glyphLifter.setPosition(0.5);
         /* push it in */
         encoderDrive(DRIVE_SPEED,6,6,1.5);
         /* leave a space and stop */
         encoderDrive(DRIVE_SPEED,-6,-6,1.0);
     }
+
+
     private void second_pick() {
         encoderDrive(DRIVE_SPEED,-48,-48,10.0);
         intakeLeft.setPower(1);
