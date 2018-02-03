@@ -54,8 +54,10 @@ public class myRobot {
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double     DRIVE_SPEED             = 0.7;
+    private double          drive_speed =   0.7;
     static final double     TURN_SPEED              = 0.6;
-    static final double     MY_K1              = 0.17; // Jan 4th gary change MY_K1 = 0.17  1/2/2018 gary change 2 1/2/2018 MY_K1 = 0.19 to make robot go farther
+    static final double     FULL_SPEED              = 1.0;
+    static final double     MY_K1              = 0.20; // Jan 4th gary change MY_K1 = 0.17  1/2/2018 gary change 2 1/2/2018 MY_K1 = 0.19 to make robot go farther
 
     public void initialize (int bsPosition, boolean isRed, LinearOpMode opMode) {
 
@@ -142,11 +144,38 @@ public class myRobot {
 
           /* unloading */
           scoreGlyphs();
+          fuzzy();
+          push();
     }
 
+    public void fast_run() {
+             drive_speed = 0.8;
+             jewelHitter.setPosition(0.52);
+             myOpMode.sleep(500);
+             jewelHitter.setPosition(0.6);
+             myOpMode.sleep(100);
+             kickOpponentJewel(myTeamRed);
+
+              /* get my pit location by scan the Vumark */
+             updateMyPitLocation();
+               /* get to the right postion before unload Glyphs */
+             scorePositioning();
+               /* unloading */
+             scoreGlyphs();
+            // fuzzy();
+             push();
+             second_pick();
+             scoreGlyphs();
+             push();
+         }
+
     public void stop() {
+        stop_auto();
         imu.stopAccelerationIntegration();
     }
+
+
+
 
 
     private void encoderDrive(double speed,
@@ -247,7 +276,7 @@ public class myRobot {
         Logging.log("drive distance, %.3f", currDegrees);
         Logging.log("drive distance, %.3f", degree_offset);
         while (myOpMode.opModeIsActive() && (Math.abs(degree_offset) > 0.6)) {
-            if (++count > 5)
+            if (++count > 4)
                 break;
             drive_distance = (degree_offset * k1);
             Logging.log("drive distance, %.3f", drive_distance);
@@ -337,7 +366,7 @@ public class myRobot {
     }
 
     private int  redAtRight() {
-        myOpMode.sleep(500);
+        myOpMode.sleep(200);
         myOpMode.telemetry.addLine("red " + colorRange.red() + " blue: " + colorRange.blue());
 
         /* check whether value is valid or not */
@@ -409,9 +438,9 @@ public class myRobot {
                 myOpMode.telemetry.update();
                 break;
             }
-            encoderDrive(TURN_SPEED, -2, 2, 4.0);
+            encoderDrive(TURN_SPEED, -3, 3, 4.0);
             myOpMode.sleep(200);
-            offset = offset - 2;
+            offset = offset - 3;
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
         }
         myOpMode.telemetry.addData("VuMark offset", offset);
@@ -434,7 +463,7 @@ public class myRobot {
             myOpMode.telemetry.addData("get position right", myPictoLocation);
         }
         myOpMode.telemetry.update();
-        //encoderDrive(TURN_SPEED, -offset, offset, 4.0);
+        encoderDrive(TURN_SPEED, -offset, offset, 4.0);
         imudrive_target(0, MY_K1);
         myOpMode.telemetry.addData("VuMark position", myPictoLocation);
         myOpMode.telemetry.update();
@@ -467,29 +496,33 @@ public class myRobot {
         double to_center;
         double distance_h = 0;
         double distance_v = 0;
-        double w_center_offset = 0.5;
+        double w_center_offset = 0.8;
         double bsoffset1 = 1.0;   /* forwarding direction */
         double bsoffset2 = 0.5;  /* jowler hit direction, make it longer?*/
-        double to_cryptbox = 16.5;
+        double to_cryptbox = 6.00;
 
         if (myBSPosition == 1 || myBSPosition == 3) {
 
             to_center = 12;
-            distance_v = 24 + bsoffset1;
             if (myBSPosition == 1) {
-                distance_h = (to_center + offset + bsoffset2 - w_center_offset );
-                distance_v = 24 + bsoffset1 - w_center_offset;
-                encoderDrive(DRIVE_SPEED, distance_v, distance_v, 4);
-                imudrive(90, MY_K1);
-                //encoderDrive(DRIVE_SPEED,12,12,4);
+
+                distance_h = (to_center + offset + bsoffset2 - w_center_offset);
+                distance_v = 24 + bsoffset1 + w_center_offset;
+                to_cryptbox =  5.0 +  w_center_offset - bsoffset2;
+                encoderDrive(drive_speed, distance_v, distance_v, 4);
+                imudrive_target(90, MY_K1);
+                encoderDrive(drive_speed, distance_h, distance_h, 4);
+                imudrive_target(0, MY_K1);
+
             } else {
-                distance_h = -(to_center + offset + bsoffset2 - w_center_offset);
-                distance_v = -(24 - bsoffset1 + w_center_offset);
-                encoderDrive(DRIVE_SPEED, distance_v, distance_v, 4);
-                imudrive(-90, MY_K1);
+                distance_h = (to_center + offset  - w_center_offset -3);
+                distance_v = -(24.5 - bsoffset1 + w_center_offset);
+                to_cryptbox =  to_cryptbox  -  w_center_offset - bsoffset2;
+                encoderDrive(drive_speed, distance_v, distance_v, 4);
+                imudrive_target(90, MY_K1);
+                encoderDrive(drive_speed, distance_h, distance_h, 4);
+                imudrive_target(180, MY_K1);
             }
-            encoderDrive(DRIVE_SPEED, distance_h, distance_h, 4);
-            imudrive(-90, MY_K1);
         }
         if (myBSPosition == 2 || myBSPosition == 4) {
             to_center = 36;
@@ -500,69 +533,59 @@ public class myRobot {
                 distance_h = -(to_center + offset - bsoffset1 + w_center_offset);
                 to_cryptbox =  to_cryptbox -  w_center_offset - bsoffset2;
             }
-            encoderDrive(DRIVE_SPEED, distance_h, distance_h, 4.0);
+            encoderDrive(drive_speed, distance_h, distance_h, 4.0);
             imudrive_target(-90, MY_K1);
         }
-        encoderDrive(DRIVE_SPEED, to_cryptbox, to_cryptbox, 4.0);
+        encoderDrive(drive_speed, to_cryptbox, to_cryptbox, 5.0);
     }
 
     private void scoreGlyphs() {
         /* touch the door */
         myOpMode.sleep(200);
         /* leaving  enough space for drop the Glyph*/
-        encoderDrive(DRIVE_SPEED,-4.5,-4.5,2);
+       // encoderDrive(DRIVE_SPEED,-5,-5,2);
         /* move Glyph out of convey belt for easy lifting */
         intakeLeft.setPower(0.4);
         intakeRight.setPower(0.4);
         myOpMode.sleep(300);
         /* start shooting, initially with bigger power then slow down */
-        glyphLifter.setPosition(0.0);
-        glyphDumper.setPower(0.35);
-        myOpMode.sleep(1400);
+        //glyphLifter.setPosition(0.0);
+        glyphDumper.setPower(0.4);
+        myOpMode.sleep(1200);
         intakeLeft.setPower(0);
         intakeRight.setPower(0);
         glyphDumper.setPower(0.1);
+    }
 
-        /* turning to fix alignment issue:
-         */
-        encoderDrive(DRIVE_SPEED,-2,2,1.0);
-        encoderDrive(DRIVE_SPEED,-1.5,-1.5,1.0);
-        encoderDrive(DRIVE_SPEED,3,-3,1.0);
+    public void fuzzy() {
+          encoderDrive(DRIVE_SPEED,-2,2,1.0);
+          encoderDrive(DRIVE_SPEED,-1.5,-1.5,1.0);
+          encoderDrive(DRIVE_SPEED,3,-3,1.0);
+    }
 
-        // encoderDrive(DRIVE_SPEED,-3,3,1.0);
-        /* leave more room to drop glyph*/
-        encoderDrive(DRIVE_SPEED,-2,-2,1.0);
-        /* finish shoot,  reset everything */
-        glyphDumper.setPower(-0.5);
-        myOpMode.sleep(800);
-        glyphDumper.setPower(0);
-        glyphLifter.setPosition(0.5);
-        /* push it in */
-        encoderDrive(DRIVE_SPEED,6,6,1.5);
-        /* leave a space and stop */
-        encoderDrive(DRIVE_SPEED,-6,-6,1.0);
+    public void push() {
+            encoderDrive(DRIVE_SPEED,-3,-3,1.0);
+            glyphDumper.setPower(-0.5);
+            encoderDrive(DRIVE_SPEED,6,6,1.5);
+    }
+
+    private void stop_auto() {
+         glyphDumper.setPower(0);
+         encoderDrive(DRIVE_SPEED,-4,-4,1.0);
+
     }
 
     private void second_pick() {
-        encoderDrive(DRIVE_SPEED,-48,-48,10.0);
         intakeLeft.setPower(1);
         intakeRight.setPower(1);
-        myOpMode.sleep(300);
+        encoderDrive(FULL_SPEED,-44,-44,10.0);
+        encoderDrive(TURN_SPEED,2,-2,2);
+        encoderDrive(TURN_SPEED,-4,4,2);
         intakeLeft.setPower(0);
         intakeRight.setPower(0);
-        encoderDrive(TURN_SPEED,4.,-4,5);
-        intakeLeft.setPower(1);
-        intakeRight.setPower(1);
-        myOpMode.sleep(300);
-        intakeLeft.setPower(0);
-        intakeRight.setPower(0);
-        encoderDrive(TURN_SPEED,-8,8,5);
-        intakeLeft.setPower(1);
-        intakeRight.setPower(1);
-        myOpMode.sleep(300);
-        intakeLeft.setPower(0);
-        intakeRight.setPower(0);
-        encoderDrive(TURN_SPEED,4,-4,5);
-        encoderDrive(DRIVE_SPEED,40,40,10);
+        imudrive_target(-90, MY_K1);
+        encoderDrive(FULL_SPEED,44,44,10);
+        scoreGlyphs();
     }
+
 }

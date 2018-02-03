@@ -47,7 +47,7 @@ public class mech_auto_test extends LinearOpMode {
     private Position startPosition = null;
     private Position targetPosition = null;
     private final boolean myTeamRed = true;
-    private int myBSPosition = 2; /* 1: red 1 2: red 2  3: blue 1 4:blue 2*/
+    private int myBSPosition = 1; /* 1: red 1 2: red 2  3: blue 1 4:blue 2*/
     private int myPictoLocation = 0;    /* 1 : left 0: center -1 : right */
 
     static final double     COUNTS_PER_MOTOR_REV    = 1120 ;    // eg: TETRIX Motor Encoder
@@ -139,14 +139,15 @@ public class mech_auto_test extends LinearOpMode {
         waitForStart();
         /* lower jewel hitter, wait until in position */
 
-        jewelHitter.setPosition(0.52);
+/*      jewelHitter.setPosition(0.52);
         sleep(500);
         jewelHitter.setPosition(0.6);
         sleep(250);
         kickOpponentJewel(myTeamRed);
+        */
 
         /* get my pit location by scan the Vumark */
-        updateMyPitLocation();
+//        updateMyPitLocation();
 
         /* get to the right postion before unload Glyphs */
         scorePositioning();
