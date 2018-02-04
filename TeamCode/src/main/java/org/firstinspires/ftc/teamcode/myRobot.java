@@ -425,7 +425,7 @@ public class myRobot {
         VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
         VuforiaTrackable relicTemplate = relicTrackables.get(0);
         relicTrackables.activate();
-        RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.UNKNOWN;
+        RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
         RelicRecoveryVuMark vuMark1;
         int offset = 0;
         myOpMode.telemetry.addLine("Scanning");
@@ -433,15 +433,15 @@ public class myRobot {
 
         while (vuMark == RelicRecoveryVuMark.UNKNOWN) {
 
-            if (offset < -6) {
+            if (offset < -4) {
                 myPictoLocation = 0;
                 myOpMode.telemetry.addData("can't figure out VuMark", offset);
                 myOpMode.telemetry.update();
                 break;
             }
-            encoderDrive(TURN_SPEED, -3, 3, 4.0);
+            encoderDrive(TURN_SPEED, -2, 2, 1.0);
             myOpMode.sleep(200);
-            offset = offset - 3;
+            offset = offset - 2;
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
         }
         myOpMode.telemetry.addData("VuMark offset", offset);
