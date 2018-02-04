@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -88,6 +89,7 @@ public class myRobot {
         drivelf.setDirection(DcMotor.Direction.REVERSE);
         drivelb.setDirection(DcMotor.Direction.REVERSE);
         intakeLeft.setDirection(DcMotor.Direction.REVERSE);
+        glyphDumper.setDirection(DcMotor.Direction.REVERSE);
         myOpMode.telemetry.addLine("reset encode");
 
         drivelf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -166,7 +168,6 @@ public class myRobot {
              push();
              second_pick();
              scoreGlyphs();
-             push();
          }
 
     public void stop() {
@@ -496,9 +497,9 @@ public class myRobot {
         double to_center;
         double distance_h = 0;
         double distance_v = 0;
-        double w_center_offset = 0.8;
-        double bsoffset1 = 1.0;   /* forwarding direction */
-        double bsoffset2 = 0.5;  /* jowler hit direction, make it longer?*/
+        double w_center_offset = 0;
+        double bsoffset1 = 0.5;   /* forwarding direction */
+        double bsoffset2 = 0;  /* jewel hit direction, make it longer?*/
         double to_cryptbox = 6.00;
 
         if (myBSPosition == 1 || myBSPosition == 3) {
@@ -515,7 +516,7 @@ public class myRobot {
                 imudrive_target(0, MY_K1);
 
             } else {
-                distance_h = (to_center + offset  - w_center_offset -3);
+                distance_h = (to_center + offset  - w_center_offset);
                 distance_v = -(24.5 - bsoffset1 + w_center_offset);
                 to_cryptbox =  to_cryptbox  -  w_center_offset - bsoffset2;
                 encoderDrive(drive_speed, distance_v, distance_v, 4);
@@ -528,9 +529,9 @@ public class myRobot {
             to_center = 36;
             if (myBSPosition == 2) {
                 distance_h = (to_center + offset + bsoffset1 - w_center_offset);
-                to_cryptbox =  to_cryptbox +  w_center_offset - bsoffset2;
+                to_cryptbox =  to_cryptbox +  w_center_offset - bsoffset2 + 0.5;
             } else {
-                distance_h = -(to_center + offset - bsoffset1 + w_center_offset);
+                distance_h = -(to_center + offset - bsoffset1 + w_center_offset+ 0.5);
                 to_cryptbox =  to_cryptbox -  w_center_offset - bsoffset2;
             }
             encoderDrive(drive_speed, distance_h, distance_h, 4.0);
@@ -578,14 +579,11 @@ public class myRobot {
     private void second_pick() {
         intakeLeft.setPower(1);
         intakeRight.setPower(1);
-        encoderDrive(FULL_SPEED,-44,-44,10.0);
-        encoderDrive(TURN_SPEED,2,-2,2);
-        encoderDrive(TURN_SPEED,-4,4,2);
+        encoderDrive(FULL_SPEED,-40,-40,10.0);
         intakeLeft.setPower(0);
         intakeRight.setPower(0);
         imudrive_target(-90, MY_K1);
-        encoderDrive(FULL_SPEED,44,44,10);
+        encoderDrive(FULL_SPEED,37,37,10);
         scoreGlyphs();
     }
-
 }

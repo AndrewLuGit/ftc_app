@@ -23,11 +23,13 @@ public class mech_teleop3 extends LinearOpMode {
     private DcMotor intakeLeft;
     private DcMotor intakeRight;
     private DcMotor glyphDumper;
+    private DcMotor relicMotor;
+    private Servo relicWrist;
+    private Servo relicGrabber;
     private LynxI2cColorRangeSensor colorRange;
     private Servo jewelHitter;
     private double k =1;
     private double intakePower;
-    private Servo glyphLifter;
     private Servo glyphHolder;
     @Override
     public void runOpMode() {
@@ -43,15 +45,22 @@ public class mech_teleop3 extends LinearOpMode {
         intakeLeft = hardwareMap.get(DcMotor.class, "intakeLeft");
         intakeRight = hardwareMap.get(DcMotor.class, "intakeRight");
         glyphDumper = hardwareMap.get(DcMotor.class,"glyphDumper");
-        glyphLifter = hardwareMap.get(Servo.class,"glyphLifter");
         jewelHitter = hardwareMap.get(Servo.class,"jewelHitter");
         glyphHolder = hardwareMap.get(Servo.class, "glyphHolder");
+        relicMotor = hardwareMap.get(DcMotor.class,"relicMotor");
+        relicWrist = hardwareMap.get(Servo.class,"relicWrist");
+        relicGrabber = hardwareMap.get(Servo.class, "relicGrabber");
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
 
         driverf.setDirection(DcMotor.Direction.REVERSE);
         driverb.setDirection(DcMotor.Direction.REVERSE);
         intakeLeft.setDirection(DcMotor.Direction.REVERSE);
+        glyphDumper.setDirection(DcMotorSimple.Direction.REVERSE);
+        driverb.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        drivelb.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        driverf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        drivelf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //Set all motors to brake at zero power mode
 
         drivelf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -61,12 +70,13 @@ public class mech_teleop3 extends LinearOpMode {
         intakeLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         glyphDumper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        relicMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // Wait for the game to start (driver presses PLAY)
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         waitForStart();
-        jewelHitter.setPosition(0.05);
+        jewelHitter.setPosition(0.075);
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             double r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
@@ -96,11 +106,9 @@ public class mech_teleop3 extends LinearOpMode {
             intakeRight.setPower(intakePower);
             if (gamepad1.right_bumper || gamepad2.right_bumper) {
                 glyphDumper.setPower(0.4);
-                glyphLifter.setPosition(0.1);
                 glyphHolder.setPosition(0.45);
             } else if (gamepad1.right_trigger>=0.1 || gamepad2.right_trigger>=0.1) {
                 glyphDumper.setPower(-0.4);
-                glyphLifter.setPosition(0.5);
             } else {
                 glyphDumper.setPower(0);
             }
@@ -108,6 +116,23 @@ public class mech_teleop3 extends LinearOpMode {
                 glyphHolder.setPosition(0);
             } else if (gamepad1.dpad_right || gamepad2.dpad_right) {
                 glyphHolder.setPosition(0.45);
+            }
+            if (gamepad2.dpad_up) {
+                relicMotor.setPower(1.0);
+            } else if (gamepad2.dpad_down) {
+                relicMotor.setPower(-1.0);
+            } else {
+                relicMotor.setPower(0);
+            }
+            if (gamepad2.a) {
+                relicWrist.setPosition(0.25);
+            } else if (gamepad2.b) {
+                relicWrist.setPosition(0.75);
+            }
+            if (gamepad2.x) {
+                relicGrabber.setPosition(0.9);
+            } else if (gamepad2.y) {
+                relicGrabber.setPosition(0.2);
             }
         }
     }

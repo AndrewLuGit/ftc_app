@@ -17,7 +17,7 @@ public class mech_auto_blue2 extends LinearOpMode {
         robot.initialize(4, false, this);
         /* start of the code */
         waitForStart();
-        robot.run();
+        robot.fast_run();
         robot.stop();
     }
 }

@@ -21,7 +21,7 @@ public class mech_auto_red2 extends LinearOpMode {
         waitForStart();
         /* lower jewel hitter, wait until in position */
 
-        robot.run();
+        robot.fast_run();
         robot.stop();
     }
 }
