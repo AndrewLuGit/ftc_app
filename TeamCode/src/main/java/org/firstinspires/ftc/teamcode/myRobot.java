@@ -42,6 +42,7 @@ public class myRobot {
     private Orientation angles;
     private OpenGLMatrix lastLocation = null;
     private VuforiaLocalizer vuforia;
+    VuforiaTrackable relicTemplate;
     private BNO055IMU.AccelerationIntegrator myIntegrator;
     private Position startPosition = null;
     private Position targetPosition = null;
@@ -122,7 +123,21 @@ public class myRobot {
         paramters2.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
         vuforia = ClassFactory.createVuforiaLocalizer(paramters2);
 
-        myOpMode.telemetry.addLine("Init Vuforia");
+
+        VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        relicTemplate = relicTrackables.get(0);
+        relicTrackables.activate();
+        RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+        if (vuMark == RelicRecoveryVuMark.LEFT) {
+            myPictoLocation = 1;
+            myOpMode.telemetry.addData("get position left", myPictoLocation);
+        } else if (vuMark == RelicRecoveryVuMark.CENTER) {
+            myPictoLocation = 0;
+            myOpMode.telemetry.addData("get position center", myPictoLocation);
+        } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
+            myPictoLocation = -1;
+            myOpMode.telemetry.addData("get position right", myPictoLocation);
+        }
 
         jewelHitter.setPosition(0.075);
         imu.startAccelerationIntegration(new Position(), new Velocity(), 20);
@@ -148,6 +163,24 @@ public class myRobot {
           scoreGlyphs();
           fuzzy();
           push();
+    }
+    public void non_straight_run() {
+        /*
+        jewelHitter.setPosition(0.52);
+        myOpMode.sleep(500);
+        jewelHitter.setPosition(0.6);
+        myOpMode.sleep(100);
+        kickOpponentJewel(myTeamRed);
+        */
+         /* get my pit location by scan the Vumark */
+        updateMyPitLocation();
+
+          /* get to the right postion before unload Glyphs */
+        scorePositioning();
+
+          /* unloading */
+        scoreGlyphs();
+        push1();
     }
 
     public void fast_run() {
@@ -422,9 +455,10 @@ public class myRobot {
 
 
     private void updateMyPitLocation() {
-        VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
-        VuforiaTrackable relicTemplate = relicTrackables.get(0);
-        relicTrackables.activate();
+       // VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+       // VuforiaTrackable relicTemplate = relicTrackables.get(0);
+       // relicTrackables.activate();
+       // myOpMode.sleep(300);
         RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
         RelicRecoveryVuMark vuMark1;
         int offset = 0;
@@ -433,15 +467,15 @@ public class myRobot {
 
         while (vuMark == RelicRecoveryVuMark.UNKNOWN) {
 
-            if (offset < -4) {
+            if (offset < -2) {
                 myPictoLocation = 0;
                 myOpMode.telemetry.addData("can't figure out VuMark", offset);
                 myOpMode.telemetry.update();
                 break;
             }
-            encoderDrive(TURN_SPEED, -2, 2, 1.0);
+            encoderDrive(TURN_SPEED, -1, 1, 1.0);
             myOpMode.sleep(200);
-            offset = offset - 2;
+            offset = offset - 1;
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
         }
         myOpMode.telemetry.addData("VuMark offset", offset);
@@ -465,7 +499,7 @@ public class myRobot {
         }
         myOpMode.telemetry.update();
         encoderDrive(TURN_SPEED, -offset, offset, 4.0);
-        imudrive_target(0, MY_K1);
+      //  imudrive_target(0, MY_K1);
         myOpMode.telemetry.addData("VuMark position", myPictoLocation);
         myOpMode.telemetry.update();
     }
@@ -501,19 +535,42 @@ public class myRobot {
         double bsoffset1 = 0.5;   /* forwarding direction */
         double bsoffset2 = 0;  /* jewel hit direction, make it longer?*/
         double to_cryptbox = 6.00;
+        double turn_degree = 0;
+        double distance;
 
         if (myBSPosition == 1 || myBSPosition == 3) {
 
             to_center = 12;
             if (myBSPosition == 1) {
+                double caliberate = 2;
+                if (myPictoLocation == 1){
+                    caliberate = 6.0;
+                } else  if (myPictoLocation == -1 ) {
+                    caliberate = 0;
 
-                distance_h = (to_center + offset + bsoffset2 - w_center_offset);
+                } else {
+                    caliberate = 3.0;
+                }
+                distance_h = (to_center + offset + bsoffset2 - w_center_offset) - caliberate;
                 distance_v = 24 + bsoffset1 + w_center_offset;
+
                 to_cryptbox =  5.0 +  w_center_offset - bsoffset2;
-                encoderDrive(drive_speed, distance_v, distance_v, 4);
+
+                distance_v = distance_v + to_cryptbox;
+                turn_degree = Math.atan2(distance_h,  distance_v) * 180 /Math.PI;
+                imudrive_target(turn_degree, MY_K1);
+
+                myOpMode.telemetry.addData("turn degree", turn_degree);
+
+                distance = Math.sqrt(distance_h * distance_h + distance_v * distance_v) -2 ;
+                myOpMode.telemetry.addData("distance", distance);
+
+                encoderDrive(drive_speed, distance, distance, 6);
+                /*
                 imudrive_target(90, MY_K1);
                 encoderDrive(drive_speed, distance_h, distance_h, 4);
                 imudrive_target(0, MY_K1);
+                */
 
             } else {
                 distance_h = (to_center + offset  - w_center_offset);
@@ -536,8 +593,9 @@ public class myRobot {
             }
             encoderDrive(drive_speed, distance_h, distance_h, 4.0);
             imudrive_target(-90, MY_K1);
+            encoderDrive(drive_speed, to_cryptbox, to_cryptbox, 5.0);
         }
-        encoderDrive(drive_speed, to_cryptbox, to_cryptbox, 5.0);
+
     }
 
     private void scoreGlyphs() {
@@ -568,6 +626,13 @@ public class myRobot {
             encoderDrive(DRIVE_SPEED,-3,-3,1.0);
             glyphDumper.setPower(-0.5);
             encoderDrive(DRIVE_SPEED,6,6,1.5);
+    }
+
+    public void push1() {
+       // encoderDrive(DRIVE_SPEED,-2,-2,1.0);
+        glyphDumper.setPower(-0.5);
+        encoderDrive(DRIVE_SPEED,5,-5,1.0);
+        encoderDrive(DRIVE_SPEED,2,2,1.0);
     }
 
     private void stop_auto() {
