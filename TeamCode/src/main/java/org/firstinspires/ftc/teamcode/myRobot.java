@@ -165,13 +165,12 @@ public class myRobot {
           push();
     }
     public void non_straight_run() {
-        /*
+
         jewelHitter.setPosition(0.52);
         myOpMode.sleep(500);
         jewelHitter.setPosition(0.6);
         myOpMode.sleep(100);
         kickOpponentJewel(myTeamRed);
-        */
          /* get my pit location by scan the Vumark */
         updateMyPitLocation();
 
@@ -458,7 +457,7 @@ public class myRobot {
        // VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
        // VuforiaTrackable relicTemplate = relicTrackables.get(0);
        // relicTrackables.activate();
-       // myOpMode.sleep(300);
+        myOpMode.sleep(300);
         RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
         RelicRecoveryVuMark vuMark1;
         int offset = 0;
@@ -498,8 +497,10 @@ public class myRobot {
             myOpMode.telemetry.addData("get position right", myPictoLocation);
         }
         myOpMode.telemetry.update();
-        encoderDrive(TURN_SPEED, -offset, offset, 4.0);
-      //  imudrive_target(0, MY_K1);
+        if ((myBSPosition != 1) && (offset != 0)) {
+            //encoderDrive(TURN_SPEED, -offset, offset, 4.0);
+            imudrive_target(0, MY_K1);
+        }
         myOpMode.telemetry.addData("VuMark position", myPictoLocation);
         myOpMode.telemetry.update();
     }
@@ -542,19 +543,19 @@ public class myRobot {
 
             to_center = 12;
             if (myBSPosition == 1) {
-                double caliberate = 2;
+                double calibrate = 0.5;
                 if (myPictoLocation == 1){
-                    caliberate = 6.0;
+                    calibrate =0.5;
                 } else  if (myPictoLocation == -1 ) {
-                    caliberate = 0;
+                    calibrate = 0.5;
 
                 } else {
-                    caliberate = 3.0;
+                    calibrate = 0;
                 }
-                distance_h = (to_center + offset + bsoffset2 - w_center_offset) - caliberate;
+                distance_h = (to_center + offset + bsoffset2 - w_center_offset) + calibrate;
                 distance_v = 24 + bsoffset1 + w_center_offset;
 
-                to_cryptbox =  5.0 +  w_center_offset - bsoffset2;
+                to_cryptbox =  7.5 +  w_center_offset - bsoffset2;
 
                 distance_v = distance_v + to_cryptbox;
                 turn_degree = Math.atan2(distance_h,  distance_v) * 180 /Math.PI;
@@ -562,10 +563,11 @@ public class myRobot {
 
                 myOpMode.telemetry.addData("turn degree", turn_degree);
 
-                distance = Math.sqrt(distance_h * distance_h + distance_v * distance_v) -2 ;
+                distance = Math.sqrt(distance_h * distance_h + distance_v * distance_v);
                 myOpMode.telemetry.addData("distance", distance);
 
                 encoderDrive(drive_speed, distance, distance, 6);
+                imudrive_target(0, MY_K1);
                 /*
                 imudrive_target(90, MY_K1);
                 encoderDrive(drive_speed, distance_h, distance_h, 4);
@@ -574,7 +576,7 @@ public class myRobot {
 
             } else {
                 distance_h = (to_center + offset  - w_center_offset);
-                distance_v = -(24.5 - bsoffset1 + w_center_offset);
+                distance_v = -(28 - bsoffset1 + w_center_offset);
                 to_cryptbox =  to_cryptbox  -  w_center_offset - bsoffset2;
                 encoderDrive(drive_speed, distance_v, distance_v, 4);
                 imudrive_target(90, MY_K1);
@@ -625,14 +627,14 @@ public class myRobot {
     public void push() {
             encoderDrive(DRIVE_SPEED,-3,-3,1.0);
             glyphDumper.setPower(-0.5);
-            encoderDrive(DRIVE_SPEED,6,6,1.5);
+            encoderDrive(DRIVE_SPEED,6.5,6.5,1.5);
     }
 
     public void push1() {
        // encoderDrive(DRIVE_SPEED,-2,-2,1.0);
         glyphDumper.setPower(-0.5);
-        encoderDrive(DRIVE_SPEED,5,-5,1.0);
-        encoderDrive(DRIVE_SPEED,2,2,1.0);
+        encoderDrive(DRIVE_SPEED,-3,-3,1.0);
+        encoderDrive(DRIVE_SPEED,6,6,1.0);
     }
 
     private void stop_auto() {
