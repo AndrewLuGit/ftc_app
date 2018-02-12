@@ -183,7 +183,27 @@ public class myRobot {
              scoreGlyphs2();
              push();
          }
+    public void fast_run2() {
+        drive_speed = 0.8;
 
+        jewelHitter.setPosition(0.52);
+        myOpMode.sleep(500);
+        jewelHitter.setPosition(0.6);
+        myOpMode.sleep(100);
+        kickOpponentJewel(myTeamRed);
+              /* get my pit location by scan the Vumark */
+        updateMyPitLocation();
+               /* get to the right postion before unload Glyphs */
+        scorePositioning();
+               /* unloading */
+        scoreGlyphs();
+        if (myPictoLocation == 1){
+            second_pick2();
+            scoreGlyphs2();
+        }
+        // fuzzy();
+        push();
+    }
     public void test_run() {
         scoreGlyphs2();
         push();
@@ -326,6 +346,35 @@ public class myRobot {
         Logging.log("drive distance, %.3f", currDegrees);
         Logging.log("drive distance, %.3f", degree_offset);
         while (myOpMode.opModeIsActive() && (Math.abs(degree_offset) > 1.0)) {
+            if (++count > 5)
+                break;
+            drive_distance = (degree_offset * k1);
+            Logging.log("drive distance, %.3f", drive_distance);
+            myOpMode.telemetry.addData("drive distance", drive_distance);
+            encoderDrive(TURN_SPEED, -drive_distance, drive_distance, 5.0);  // S2: Turn Right 12 Inches with 5Sec timeout
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            currDegrees = revert_normalize(currDegrees, angles.firstAngle);
+            degree_offset = tarDegrees - currDegrees;
+            myOpMode.telemetry.addData("current degree", currDegrees);
+            myOpMode.telemetry.addData("Degrees_offset", degree_offset);
+            Logging.log("drive distance, %.3f", currDegrees);
+            Logging.log("drive distance, %.3f", degree_offset);
+            myOpMode.telemetry.update();
+        }
+    }
+    private void imudrive_target2(double tarDegrees, double k1) {
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        double initDegrees = angles.firstAngle;
+        double pwr = 0;
+        double currDegrees = angles.firstAngle;
+        double degree_offset;
+        double drive_distance = 0;
+        int count = 0;
+
+        degree_offset = tarDegrees - currDegrees;
+        Logging.log("drive distance, %.3f", currDegrees);
+        Logging.log("drive distance, %.3f", degree_offset);
+        while (myOpMode.opModeIsActive() && (Math.abs(degree_offset) > 2.0)) {
             if (++count > 5)
                 break;
             drive_distance = (degree_offset * k1);
@@ -608,16 +657,16 @@ public class myRobot {
         /* move Glyph out of convey belt for easy lifting */
         intakeLeft.setPower(0.4);
         intakeRight.setPower(0.4);
-        myOpMode.sleep(400);
+        myOpMode.sleep(500);
         /* start shooting, initially with bigger power then slow down */
         //glyphLifter.setPosition(0.0);
-        glyphDumper.setPower(0.8);
+        glyphDumper.setPower(0.7);
         myOpMode.sleep(300);
         glyphDumper.setPower(0.3);
         myOpMode.sleep(1000);
         intakeLeft.setPower(0);
         intakeRight.setPower(0);
-        glyphDumper.setPower(0.1);
+        //glyphDumper.setPower(0.1);
     }
 
 
@@ -645,9 +694,27 @@ public class myRobot {
         intakeLeft.setPower(0.9);
         intakeRight.setPower(0.86);
         encoderDrive(FULL_SPEED,-47,-47,10.0);
+        glyphDumper.setPower(0);
         intakeLeft.setPower(0);
         intakeRight.setPower(0);
         imudrive_target(-90, MY_K1);
         encoderDrive(FULL_SPEED,44,44,10);
+    }
+    private void second_pick2() {
+        double h = 12+12-7.6;
+        double v = 24-8+24+12;
+        double distance = Math.sqrt(h*h+v*v)+2;
+        double angle = -Math.atan2(h,v) *180/Math.PI;
+        glyphDumper.setPower(-0.5);
+        encoderDrive(DRIVE_SPEED, -4, -4, 1.0);
+        imudrive_target2(angle,MY_K1);
+        intakeLeft.setPower(0.9);
+        intakeRight.setPower(0.86);
+        encoderDrive(FULL_SPEED,-distance,-distance,10.0);
+        glyphDumper.setPower(0);
+        intakeLeft.setPower(0);
+        intakeRight.setPower(0);
+        encoderDrive(FULL_SPEED,distance,distance,10);
+        imudrive_target2(0, MY_K1);
     }
 }

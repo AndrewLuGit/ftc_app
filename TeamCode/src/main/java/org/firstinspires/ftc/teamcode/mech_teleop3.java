@@ -24,12 +24,11 @@ public class mech_teleop3 extends LinearOpMode {
     private DcMotor intakeRight;
     private DcMotor glyphDumper;
     private DcMotor relicMotor;
-    private Servo relicWrist;
-    private Servo relicGrabber;
+    //private Servo relicWrist;
+    //private Servo relicGrabber;
     private LynxI2cColorRangeSensor colorRange;
     private Servo jewelHitter;
     private double k =1;
-    private double intakePower;
     private Servo glyphHolder;
     @Override
     public void runOpMode() {
@@ -48,8 +47,8 @@ public class mech_teleop3 extends LinearOpMode {
         jewelHitter = hardwareMap.get(Servo.class,"jewelHitter");
         glyphHolder = hardwareMap.get(Servo.class, "glyphHolder");
         relicMotor = hardwareMap.get(DcMotor.class,"relicMotor");
-        relicWrist = hardwareMap.get(Servo.class,"relicWrist");
-        relicGrabber = hardwareMap.get(Servo.class, "relicGrabber");
+        //relicWrist = hardwareMap.get(Servo.class,"relicWrist");
+        //relicGrabber = hardwareMap.get(Servo.class, "relicGrabber");
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
 
@@ -96,14 +95,15 @@ public class mech_teleop3 extends LinearOpMode {
                 k = 0.3;
             }
             if (gamepad1.left_bumper || gamepad2.left_bumper) {
-                intakePower = 1;
+                intakeLeft.setPower(1);
+                intakeRight.setPower(0.95);
             } else if (gamepad1.left_trigger>=0.1 || gamepad2.left_trigger>=0.1) {
-                intakePower = -1;
+                intakeLeft.setPower(-1);
+                intakeRight.setPower(-0.95);
             } else {
-                intakePower = 0;
+                intakeLeft.setPower(0);
+                intakeRight.setPower(0);
             }
-            intakeLeft.setPower(intakePower);
-            intakeRight.setPower(intakePower);
             if (gamepad1.right_bumper || gamepad2.right_bumper) {
                 glyphDumper.setPower(0.4);
                 glyphHolder.setPosition(0.45);
@@ -117,7 +117,12 @@ public class mech_teleop3 extends LinearOpMode {
             } else if (gamepad1.dpad_right || gamepad2.dpad_right) {
                 glyphHolder.setPosition(0.45);
             }
-            if (gamepad2.dpad_up) {
+            if (gamepad1.x) {
+                drivetime(-0.5,0.5,0.5,-0.5,150);
+            } else if (gamepad1.b) {
+                drivetime(0.5,-0.5,-0.5,0.5,150);
+            }
+            /*if (gamepad2.dpad_up) {
                 relicMotor.setPower(1.0);
             } else if (gamepad2.dpad_down) {
                 relicMotor.setPower(-1.0);
@@ -133,7 +138,22 @@ public class mech_teleop3 extends LinearOpMode {
                 relicGrabber.setPosition(0.9);
             } else if (gamepad2.y) {
                 relicGrabber.setPosition(0.2);
-            }
+            }*/
         }
+    }
+    private void drivetime(double lfPower, double rfPower, double lbPower, double rbPower, long milliseconds) {
+        drivelf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        driverf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        drivelf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        driverf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        drivelf.setPower(lfPower);
+        driverf.setPower(rfPower);
+        drivelb.setPower(lbPower);
+        driverb.setPower(rbPower);
+        sleep(milliseconds);
+        drivelf.setPower(0.0);
+        driverf.setPower(0.0);
+        drivelb.setPower(0.0);
+        driverb.setPower(0.0);
     }
 }
