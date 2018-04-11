@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode;
+import com.disnodeteam.dogecv.detectors.JewelDetector;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxI2cColorRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -200,6 +201,8 @@ public class myRobot {
         if (myPictoLocation == 1){
             second_pick2();
             scoreGlyphs2();
+        } else {
+            fuzzy();
         }
         // fuzzy();
         push();
@@ -571,7 +574,7 @@ public class myRobot {
         double w_center_offset = 0;
         double bsoffset1 = 1.0;   /* forwarding direction */
         double bsoffset2 = 0;  /* jewel hit direction, make it longer?*/
-        double to_cryptbox = 6.00;
+        double to_cryptbox = 7.00;
         double turn_degree = 0;
         double distance;
 
@@ -581,12 +584,12 @@ public class myRobot {
             if (myBSPosition == 1) {
                 double calibrate = 0.5;
                 if (myPictoLocation == 1){
-                    calibrate =0.5;
+                    calibrate =2.0;
                 } else  if (myPictoLocation == -1 ) {
-                    calibrate = 0.5;
+                    calibrate = 0.7;
 
                 } else {
-                    calibrate = 0;
+                    calibrate = 0.7;
                 }
                 distance_h = (to_center + offset + bsoffset2 - w_center_offset) + calibrate;
                 distance_v = 24 + bsoffset1 + w_center_offset;
@@ -643,7 +646,7 @@ public class myRobot {
         /* start shooting, initially with bigger power then slow down */
         //glyphLifter.setPosition(0.0);
         glyphDumper.setPower(0.4);
-        myOpMode.sleep(1200);
+        myOpMode.sleep(1100);
         intakeLeft.setPower(0);
         intakeRight.setPower(0);
         glyphDumper.setPower(0.1);
@@ -663,7 +666,7 @@ public class myRobot {
         glyphDumper.setPower(0.7);
         myOpMode.sleep(300);
         glyphDumper.setPower(0.3);
-        myOpMode.sleep(1000);
+        myOpMode.sleep(700);
         intakeLeft.setPower(0);
         intakeRight.setPower(0);
         //glyphDumper.setPower(0.1);
@@ -671,9 +674,9 @@ public class myRobot {
 
 
     public void fuzzy() {
-          encoderDrive(DRIVE_SPEED,-2,2,1.0);
+          encoderDrive(DRIVE_SPEED,-3,3,1.0);
           encoderDrive(DRIVE_SPEED,-1.5,-1.5,1.0);
-          encoderDrive(DRIVE_SPEED,3,-3,1.0);
+          encoderDrive(DRIVE_SPEED,3.5,-3.5,1.0);
     }
 
     public void push() {
@@ -693,24 +696,29 @@ public class myRobot {
         glyphDumper.setPower(-0.5);
         intakeLeft.setPower(0.9);
         intakeRight.setPower(0.86);
+        myOpMode.sleep(200);
         encoderDrive(FULL_SPEED,-47,-47,10.0);
+        myOpMode.sleep(300);
         glyphDumper.setPower(0);
         intakeLeft.setPower(0);
         intakeRight.setPower(0);
         imudrive_target(-90, MY_K1);
-        encoderDrive(FULL_SPEED,44,44,10);
+        encoderDrive(FULL_SPEED,47,47,10);
+        encoderDrive(DRIVE_SPEED,-3,-3,1.0);
     }
     private void second_pick2() {
-        double h = 12+12-7.6;
+        double h = 12+12-7.6+2;
         double v = 24-8+24+12;
-        double distance = Math.sqrt(h*h+v*v)+2;
+        double distance = Math.sqrt(h*h+v*v)+1;
         double angle = -Math.atan2(h,v) *180/Math.PI;
         glyphDumper.setPower(-0.5);
-        encoderDrive(DRIVE_SPEED, -4, -4, 1.0);
+       // encoderDrive(DRIVE_SPEED, 2, 2, 1.0);
+        encoderDrive(FULL_SPEED, -4, -4, 1.0);
         imudrive_target2(angle,MY_K1);
         intakeLeft.setPower(0.9);
         intakeRight.setPower(0.86);
         encoderDrive(FULL_SPEED,-distance,-distance,10.0);
+        myOpMode.sleep(200);
         glyphDumper.setPower(0);
         intakeLeft.setPower(0);
         intakeRight.setPower(0);
